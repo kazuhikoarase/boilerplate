@@ -1,0 +1,13 @@
+<project default="clean" basedir=".">
+  <target name="clean">
+    <delete failonerror="true" defaultexcludes="false">
+      <fileset dir=".">
+        <include name="*.suo" />
+        <include name=".vs/**" />
+        <include name="**/bin/**" />
+        <include name="**/obj/**" />
+        <include name="**/*.user" />
+      </fileset>
+    </delete>
+  </target>
+</project>

@@ -1,0 +1,200 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <style>
+
+body { overflow: hidden; margin: 0px; padding: 0px; }
+
+#tk2020 {
+  position: relative; overflow: hidden; width: 100px; height: 100px;
+  background-color: #fff;
+}
+#tk2020::before, #tk2020::after { content: ''; position: absolute; }
+#tk2020::before { /* red circle */
+  left: 66.7%; top: 0%; width: 33.3%; height: 33.3%; border-radius: 50%;
+  background-color: #f00;
+}
+#tk2020::after { /* black rect */
+  left: 33.3%; top: 0%; width: 33.3%; height: 100%;
+  background-color: #000;
+}
+#tk2020 .lt, #tk2020 .rb {
+  position: absolute; overflow: hidden; width: 100%; height: 100%;
+}
+#tk2020 .lt .m, #tk2020 .rb .m {
+  position: absolute; width: 106%; height: 106%; border-radius: 53%;
+  background-color: #fff;
+}
+#tk2020 .lt    { left: -66%; top: -66%; background-color: #c90; }
+#tk2020 .lt .m { left:  63%; top:  63%; }
+#tk2020 .rb    { left:  66%; top:  66%; background-color: #ccc; }
+#tk2020 .rb .m { left: -69%; top: -69%; }
+
+#delay {
+  width: 100px;
+  height: 100px;
+  border: 0px solid #000;
+  border-radius: 50px;
+  background-color: yellow;
+  font-size: 14px;
+  transition: 2s font-size, 2s background-color;
+/*  transition-duration: 4s;*/
+  /*transition-delay: 2s;*/
+  
+}
+
+#delay:hover {
+  background-color: blue;
+  font-size: 36px;
+}
+
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="assets/toolkit.js"></script>
+  <script src="assets/toolkit-spec.js"></script>
+  <script>
+
+'use strict';
+
+!function() {
+
+  var createElement = toolkit.createElement;
+
+  var c = createElement('div').$style({
+    width: '50px', height: '50px', backgroundColor: 'yellow'
+  });
+
+  var e = createElement('div').$style({
+    width: '100px', height: '100px', backgroundColor: 'red'
+  }).$on({
+    mouseover: function() {
+      e.$style({ backgroundColor: 'green' });
+      e.$remove(c);
+    },
+    mouseout: function() {
+      e.$style({ backgroundColor: 'red' });
+      e.$append(c);
+    }
+  }).$append(c);
+
+  window.setTimeout(function() {
+    document.body.appendChild(e.$el);
+  });
+
+  var MyClass = function() {
+    this.x = 4;
+  };
+  Object.defineProperties(MyClass.prototype, {
+    x: { value: 3, writable: true },
+    add: {
+      value: function(a, b) { return a + b; },
+      writable: false
+    }
+  });
+
+  var mc = new MyClass();
+//  mc.x = 4;
+  console.log(mc.x);
+  console.log(mc.add(3, 7) );
+
+//  mc.add = 0;
+
+} ();
+
+  </script>
+</head>
+<body>
+
+<div id="delay">delay</div>
+
+<div id="tk 2020">
+  <div class="lt"><div class="m"></div></div>
+  <div class="rb"><div class="m"></div></div>
+</div>
+
+<div id="app" style="width:100%;height:100%;">
+  <div style="height:50%;">hi,</div>
+  <arm :style="rstyle">
+    <arm :style="style">
+      <arm :style="style">
+      <arm :style="style">
+      <arm :style="style">
+      <arm :style="style">
+      </arm>
+      </arm>
+      </arm>
+      </arm>
+    </arm>
+  </arm>
+
+</div>
+<script>
+
+new Vue({
+  el: '#app',
+  data: {
+    list: [],
+    b: 2,
+    rotate: 20,
+    alive: true
+  },
+  mounted: function() {
+    /*
+    var lastTime = null;
+    var enterFrame = function(time) {
+      if (typeof lastTime == 'number') {
+        this.rotate = Math.sin(time / 1000) * 40;
+      }
+      lastTime = time;
+      window.requestAnimationFrame(enterFrame);
+    }.bind(this);
+    enterFrame();
+    */
+  },
+  beforeDestroy: function() {
+    this.alive = false;
+  },
+  computed: {
+    rstyle: function() {
+      var style = {
+        transform: 'translate(-50px,0) rotate(' +
+            this.rotate + 'deg) translate(50px,0)'
+      };
+      return style;
+    },
+    style: function() {
+      var style = {
+        left: '100px',
+        transform: 'translate(-50px,0) rotate(' +
+            this.rotate + 'deg) translate(50px,0)'
+      };
+      return style;
+    }
+  },
+  components: {
+    arm: {
+      template: '<div :style="style"><slot/></div>',
+      computed: {
+        style: function() {
+          var style = {
+            position: 'relative',
+            width: '100px',
+            height: '20px',
+            backgroundColor: 'rgba(0,0,0,0.5)'
+          };
+          return style;
+        }
+      }
+    }
+  },
+  methods: {
+    calc: function(item) {
+      return +item.a + +item.b;
+    }
+  }
+});
+
+</script>
+</body>
+</html>

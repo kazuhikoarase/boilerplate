@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<style>
+#editor {
+  border: 1px solid blue;
+  min-width: 100px;
+  min-height: 100px;
+  padding: 2px;
+}
+
+#editor TABLE {
+  border-collapse: collapse;
+}
+#editor TABLE,
+#editor TABLE TD {
+  border: 1px solid red;
+}
+
+</style>
+<script>
+
+window.addEventListener('load', function() {
+  var updateSrc = function() {
+    src.textContent = editor.innerHTML;
+  };
+  document.addEventListener('keydown', function(event) {
+    if (event.keyCode == 13) {
+      event.preventDefault();
+      if (event.shiftKey) {
+        insertNode(editor, 'hr');
+      } else {
+        insertNode(editor, 'br');
+      }
+    }
+  });
+  document.addEventListener('keyup', function(event) {
+    updateSrc();
+  });
+  var editor = document.getElementById('editor');
+  var src = document.getElementById('src');
+  editor.contentEditable = true;
+  var appendButton = function(label, action) {
+    var button = document.createElement('button');
+    button.textContent = label;
+    button.addEventListener('click', action);
+    document.body.appendChild(button);
+  };
+  var exec = function(cmd, arg) {
+    var b = document.execCommand(cmd, false, arg);
+    if (!b) {
+      console.log(cmd + ' is not supported.')
+    }
+    updateSrc();
+  };
+  appendButton('test', function() {
+
+    console.log('puke');
+    exec('formatblock', 'pre');
+    
+  });
+  appendButton('test', function() {
+    exec('bold');
+  });
+  appendButton('test', function() {
+    exec('foreColor', '#f0f0f0');
+  });
+});
+
+var insertNode = function(editor, tag) {
+  var sel = window.getSelection();
+  console.log(sel.rangeCount);
+  if (sel.rangeCount > 0) {
+    var range = sel.getRangeAt(0);
+    var e = document.createElement(tag);
+    range.deleteContents();
+    range.insertNode(e);
+    range.setStartAfter(e);
+  }
+};
+
+var editor_replaceText = function(target, replacement) {
+  if (document.selection) {
+    console.log('native selection');
+    var range = document.selection.createRange();
+    if (range.parentElement() == target) {
+      range.text = replacement;
+      range.scrollIntoView();
+    }
+  } else if (typeof target.selectionStart != 'undefined') {
+    /*
+    var pos = target.selectionStart + replacement.length;
+    target.value = target.value.substring(0, target.selectionStart) +
+      replacement +
+      target.value.substring(target.selectionEnd);
+    target.setSelectionRange(pos, pos);
+    */
+    console.log('selection:', target.selectionStart, target.selectionEnd);
+  }
+};
+
+</script>
+</head>
+<body>
+<div id="editor">test<hr/>test
+<table>
+<tbody>
+<tr><td>a</td><td>a</td><td>a</td></tr>
+<tr><td>a</td><td>a</td><td>a</td></tr>
+<tr><td>a</td><td>a</td><td>a</td></tr>
+</tbody>
+</table>
+</div>
+<pre id="src"></pre>
+</body>
+</html>

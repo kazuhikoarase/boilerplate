@@ -1,0 +1,5 @@
+<project default="all" basedir=".">
+  <target name="all">
+    <ant target="import" />
+  </target>
+</project>

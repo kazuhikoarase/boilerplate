@@ -1,0 +1,19 @@
+<project default="dist">
+  <target name="dist">
+    <delete>
+      <fileset dir=".">
+        <include name="*.xlsx"/>
+      </fileset>
+    </delete>
+    <zip destfile="xbook.xlsx">
+      <zipfileset dir="xbook">
+        <include name="**/*" />
+      </zipfileset>
+    </zip>
+    <zip destfile="xbookS2.xlsx">
+      <zipfileset dir="xbookS2">
+        <include name="**/*" />
+      </zipfileset>
+    </zip>
+  </target>
+</project>

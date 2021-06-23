@@ -1,0 +1,34 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClipImage", "ClipTest\ClipImage.csproj", "{57D74FE8-8C70-4319-B000-ACC394FAAA52}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Capwin", "Capwin\Capwin.csproj", "{693B07D0-E0F6-4DAF-867A-02A42276D8CA}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Default = Debug|Default
+		Release|Default = Release|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{57D74FE8-8C70-4319-B000-ACC394FAAA52}.Debug|Default.ActiveCfg = Debug|Any CPU
+		{57D74FE8-8C70-4319-B000-ACC394FAAA52}.Debug|Default.Build.0 = Debug|Any CPU
+		{57D74FE8-8C70-4319-B000-ACC394FAAA52}.Release|Default.ActiveCfg = Release|Any CPU
+		{57D74FE8-8C70-4319-B000-ACC394FAAA52}.Release|Default.Build.0 = Release|Any CPU
+		{693B07D0-E0F6-4DAF-867A-02A42276D8CA}.Debug|Default.ActiveCfg = Debug|Any CPU
+		{693B07D0-E0F6-4DAF-867A-02A42276D8CA}.Debug|Default.Build.0 = Debug|Any CPU
+		{693B07D0-E0F6-4DAF-867A-02A42276D8CA}.Release|Default.ActiveCfg = Release|Any CPU
+		{693B07D0-E0F6-4DAF-867A-02A42276D8CA}.Release|Default.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {26F8D207-4F35-47AE-9C44-8E7C6C99B7C3}
+	EndGlobalSection
+EndGlobal

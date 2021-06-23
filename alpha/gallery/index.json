@@ -1,0 +1,13 @@
+{
+  "title": "MyGallery",
+  "defaultFiles": [ "index.html", "index.js", "style.css" ],
+  "assetsGroups": [
+    {
+      "title": "hello",
+      "items": [
+        { "title": "test", "base": "",
+          "files": [ "index.html", "index.json" ] }
+      ]
+    }
+  ]
+}

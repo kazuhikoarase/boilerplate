@@ -1,0 +1,2 @@
+# pattern:user:group:mode:path
+*:user1:users:644:/usr/local/foo

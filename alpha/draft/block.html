@@ -1,0 +1,226 @@
+<!doctype html>
+<html>
+<head>
+<script>
+'use strict'
+window.addEventListener('load', function() {
+
+  var $s = function(tagName) {
+    return {
+      $el: document.createElementNS(
+          'http://www.w3.org/2000/svg', tagName),
+      attrs: function(attrs) {
+        for (var k in attrs) {
+          this.$el.setAttribute(k, '' + attrs[k]);
+        }
+        return this;
+      }
+    };
+  };
+
+  var mat3 = function() {
+    var m = [1, 0, 0, 0, 1, 0, 0, 0, 1];
+    return {
+      transform: function(v) {
+        var vcount = Math.floor(v.length / 3);
+        var ret = [];
+        for (var i = 0; i < vcount; i += 1) {
+          ret.push(m[0] * v[i * 3] + m[3] * v[i * 3 + 1] + m[6] * v[i * 3 + 2]);
+          ret.push(m[1] * v[i * 3] + m[4] * v[i * 3 + 1] + m[7] * v[i * 3 + 2]);
+          ret.push(m[2] * v[i * 3] + m[5] * v[i * 3 + 1] + m[8] * v[i * 3 + 2]);
+        }
+        return ret;
+      },
+      rotX: function(t, v) {
+        var s = Math.sin(t);
+        var c = Math.cos(t);
+        m = this.transform([
+          1,  0,  0,
+          0,  c, -s,
+          0,  s,  c
+        ]);
+        return this;
+      },
+      rotY: function(t, v) {
+        var s = Math.sin(t);
+        var c = Math.cos(t);
+        m = this.transform([
+           c, 0, s,
+           0, 1, 0,
+          -s, 0, c
+        ]);
+        return this;
+      },
+      rotZ: function(t, v) {
+        var s = Math.sin(t);
+        var c = Math.cos(t);
+        m = this.transform([
+          c, -s, 0,
+          s,  c, 0,
+          0,  0, 1
+        ]);
+        return this;
+      }
+    };
+  };
+
+  var trimNum = function(n) {
+    var d = Math.round(n * 100);
+    var neg = false;
+    if (d < 0) {
+      neg = true;
+      d = -d;
+    };
+    var s = '' + d;
+    while (s.length < 3) {
+      s = '0' + s;
+    }
+    return ((neg? '-' : '') +
+      s.substring(0, s.length - 2) + '.' +
+      s.substring(s.length - 2)).replace(/\.?0+$/, '');
+  };
+
+
+  var $svg = $s('svg').attrs({
+    width: 200, height: 200, viewBox: '-100 -100 200 200' });
+  document.body.appendChild($svg.$el);
+
+  var block = function(m, t, uw, uh, ud) {
+
+    var unit = 50;
+
+    var path = function(points) {
+      var vcount = Math.floor(points.length / 3);
+      var d = '';
+      for (var i = 0; i < vcount; i += 1) {
+        d += (i == 0? 'M' : 'L') +
+        trimNum(points[i * 3 + 0]) + ' ' +
+        trimNum(points[i * 3 + 1]);
+      }
+      d += 'Z';
+      $g.$el.appendChild(
+          $s('path').attrs({d: d, opacity: 0.8}).$el);
+    };
+
+    var r = unit * 2 * 2.5 / 8;
+    var ellipse = function(p) {
+      p = m.transform(p);
+      $g.$el.appendChild(
+          $s('ellipse').attrs({
+            cx: trimNum(p[0]),
+            cy: trimNum(p[1]),
+            rx: trimNum(r),
+            ry: trimNum(r * Math.cos(t) ), opacity: 0.8}).$el);
+    };
+
+    var $g = $s('g').attrs({fill: '#ccc', stroke: '#000',
+      'stroke-width': 1, 'stroke-linejoin': 'round' });
+    while ($svg.$el.firstChild) {
+      $svg.$el.removeChild($svg.$el.firstChild);
+    }
+    $svg.$el.appendChild($g.$el);
+
+    var w = unit * uw;
+    var h = unit * uh;
+    var d = unit * ud;
+    var rects = [];
+    rects.push([-w, -h, -d,  w, -h, -d,  w,  h, -d, -w,  h, -d]);
+    //rects.push([-w, -h,  d,  w, -h,  d,  w,  h,  d, -w,  h,  d]);
+    //rects.push([-w, -h,  d, -w, -h, -d, -w,  h, -d, -w,  h,  d]);
+    rects.push([ w, -h,  d,  w, -h, -d,  w,  h, -d,  w,  h,  d]);
+    //rects.push([-w, -h, -d, -w, -h,  d,  w, -h, d,   w, -h, -d]);
+    rects.push([-w,  h, -d, -w,  h,  d,  w,  h, d,   w,  h, -d]);
+
+
+    for (var i = 0; i < rects.length; i += 1) {
+      path(m.transform(rects[i]) );
+    }
+    for (var y = 0; y < uh; y += 1) {
+      for (var x = 0; x < uw; x += 1) {
+        ellipse([0, 0, -d ]);
+        ellipse([0, 0, -d - unit * 0.4]);
+      }
+    }
+  };
+
+  var updateView = function(p0, p1) {
+
+    var t = Math.acos(p1 / 100);
+    var m = mat3();
+    m.rotX(t).rotZ(p0 * Math.PI / 180);
+
+    block(m, t, 1, 1, 1 * 6 / 5);
+
+    var s = 0.5;
+    var u = [-s, -s, 0,  s, -s, 0,  s, s, 0,  -s, s, 0];
+    u = m.transform(u);
+
+    var x0 = u[0];
+    var y0 = u[1];
+    var x1 = u[3];
+    var y1 = u[4];
+    var x2 = u[6];
+    var y2 = u[7];
+
+    var p2 = Math.sin(t);
+    var p3 = x1 - x0;
+    var p4 = x1 - x2;
+    var p5 = Math.atan2(y1 - y0, x1 - x0);
+    var p6 = Math.atan2(y1 - y2, x1 - x2);
+
+    /*
+    -35deg/60%
+    22.79deg/102.39%
+    40.59deg/71.7%
+     */
+    document.getElementById('c0_0').textContent = trimNum(p0) + 'deg';
+    document.getElementById('c0_1').textContent = trimNum(p1) + '%';
+    document.getElementById('c1_0').textContent = trimNum(p3 * 100) + '%';
+    document.getElementById('c1_1').textContent = trimNum(p2 * 100) + '%';
+    document.getElementById('c1_2').textContent = trimNum(p5 * 180 / Math.PI) + 'deg';
+    document.getElementById('c2_0').textContent = trimNum(p4 * 100) + '%';
+    document.getElementById('c2_1').textContent = trimNum(p2 * 100) + '%';
+    document.getElementById('c2_2').textContent = trimNum(p6 * 180 / Math.PI) + 'deg';
+
+    console.log(
+        trimNum(p0) + 'deg' +
+        ' / ' + trimNum(p1) + '%' +
+        '\n' + trimNum(p3 * 100) + '%' +
+        ' / ' + trimNum(p2 * 100) + '%' +
+        ' / ' + trimNum(p5 * 180 / Math.PI) + 'deg' +
+        '\n' + trimNum(p4 * 100) + '%' +
+        ' / ' + trimNum(p2 * 100) + '%' +
+        ' / ' + trimNum(p6 * 180 / Math.PI) + 'deg'
+        );
+  };
+
+  var inputHandler = function() {
+    updateView(+p.value * 180 / Math.PI, Math.cos(+t.value) * 100);
+  };
+
+  var p = document.getElementById('p');
+  var t = document.getElementById('t');
+  p.addEventListener('input', inputHandler);
+  t.addEventListener('input', inputHandler);
+
+  inputHandler();
+});
+</script>
+</head>
+<body>
+
+  <table>
+    <tbody>
+      <tr><td id="c0_0"></td><td id="c0_1"></td><td id="c0_2"></td></tr>
+      <tr><td id="c1_0"></td><td id="c1_1"></td><td id="c1_2"></td></tr>
+      <tr><td id="c2_0"></td><td id="c2_1"></td><td id="c2_2"></td></tr>
+    </tbody>
+  </table>
+
+  <input id="p" type="range" min="-1.5708" max="0" value="-0.6109" step="any" />
+  <br/>
+  <input id="t" type="range" min="0" max="1.5708" value="0.9273" step="any" />
+  <br/>
+
+</body>
+</html>

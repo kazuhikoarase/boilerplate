@@ -1,0 +1,15 @@
+<project default="test">
+
+  <taskdef classpath="bin/main" classname="TarDeployTask" name="tar-deploy" />
+
+  <target name="test" >
+    <delete file="test2.tar"></delete>
+    <tar-deploy destFile="test2.tar">
+      <fileset dir="src/test/resources">
+        <include name="**/*.txt"/>
+        <include name="**/*.sh"/>
+      </fileset>
+    </tar-deploy>
+  </target>
+
+</project>

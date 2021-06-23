@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head>
+<script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div id="app">
+  <button onclick="sendMsg()">send</button>
+  <pre id="result"></pre>
+  </div>
+
+<script>
+'use strict';
+
+var seq = 0;
+var socket = io.connect();
+var allMsgs = {};
+var updateMsgs = function() {
+  document.getElementById('result').innerHTML = JSON.stringify(allMsgs,null,2);
+};
+socket.on('test_msg', function(data){
+  allMsgs[data.id] = data;
+  updateMsgs();
+}).on('test_disconnect', function(data) {
+  delete allMsgs[data.id];
+  updateMsgs();
+});
+
+var sendMsg = function() {
+  socket.emit('test_msg', { seq: ++seq, date: +new Date() });
+}
+
+//new Vue({ el: '#app' });
+</script>
+
+
+</body>
+</html>

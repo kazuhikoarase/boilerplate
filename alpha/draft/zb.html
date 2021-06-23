@@ -1,0 +1,187 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <style>
+TABLE.param-table TH,
+TABLE.param-table TD { white-space: nowrap; }
+TABLE.param-table TH,
+TABLE.param-table TD.deg { text-align: right; }
+TABLE.param-table TD.deg { width: 2rem; }
+TABLE.param-table TD.deg::after { content: 'º'; }
+  </style>
+  <script>
+
+window.addEventListener('load', function() {
+
+  'use strict';
+
+  var trimNum = function(n) {
+    var d = Math.round(n * 100);
+    var neg = false;
+    if (d < 0) {
+      neg = true;
+      d = -d;
+    };
+    var s = '' + d;
+    while (s.length < 3) {
+      s = '0' + s;
+    }
+    return ((neg? '-' : '') +
+      s.substring(0, s.length - 2) + '.' +
+      s.substring(s.length - 2)).replace(/\.?0+$/, '');
+  };
+
+  var $s = function(tagName) {
+    return {
+      $el: document.createElementNS(
+          'http://www.w3.org/2000/svg', tagName),
+      attrs: function(attrs) {
+        for (var k in attrs) {
+          this.$el.setAttribute(k, '' + attrs[k]);
+        }
+        return this;
+      }
+    };
+  };
+
+  var transformBuilder = function() {
+    var t = '';
+    return {
+      translate: function(tx, ty) {
+        t += ' translate(' + tx + ' ' + ty + ')';
+        return this;
+      },
+      scale: function(sx, sy) {
+        t += ' scale(' + sx + ' ' + sy + ')';
+        return this;
+      },
+      rotate: function(angle) {
+        t += ' rotate(' + angle + ')';
+        return this;
+      },
+      skewX: function(angle) {
+        t += ' skewX(' + angle + ')';
+        return this;
+      },
+      skewY: function(angle) {
+        t += ' skewY(' + angle + ')';
+        return this;
+      },
+      build: function() { return t; }
+    };
+  };
+
+  var d2t = function(d) { return d / 180 * Math.PI; };
+  var t2d = function(t) { return t / Math.PI * 180; };
+
+  var width = 200;
+  var height = 200;
+
+  var svg = $s('svg').attrs({
+    width: 200, height: 200, viewBox: (-width / 2) + ' ' + (-height / 2) +
+    ' ' + width + ' ' + height });
+  document.getElementById('svg').appendChild(svg.$el);
+
+  var tCir1 = $s('circle').attrs({
+    cx: 0, cy: 0, r: 25, fill: 'none', stroke: '#f90' });
+  var tCir2 = $s('circle').attrs({
+    cx: 0, cy: 0, r: 25, fill: 'none', stroke: '#f90' });
+  var tRect = $s('rect').attrs({
+    x: -40, y: -40, width: 80, height: 80, fill: 'none', stroke: '#00f' });
+  var lRect = $s('rect').attrs({
+    x: -40, y: -40, width: 80, height: 96, fill: 'none', stroke: '#f00' });
+  var rRect = $s('rect').attrs({
+    x: -40, y: -40, width: 80, height: 96, fill: 'none', stroke: '#0f0' });
+  svg.$el.appendChild(tCir1.$el);
+  svg.$el.appendChild(tCir2.$el);
+  svg.$el.appendChild(tRect.$el);
+  svg.$el.appendChild(lRect.$el);
+  svg.$el.appendChild(rRect.$el);
+
+  var p = document.getElementById('p');
+  var t = document.getElementById('t');
+
+  var inputHandler = function() {
+
+    var pVal = +p.value * -1;
+    var tVal = +t.value;
+
+    var pCos = Math.cos(d2t(pVal) );
+    var pSin = Math.sin(d2t(pVal) );
+    var tCos = Math.cos(d2t(tVal) );
+    var tSin = Math.sin(d2t(tVal) );
+    var lSkewY = t2d(Math.atan2(pSin * tSin, pCos) ); 
+    var rSkewY = t2d(-Math.atan2(pCos * tSin, pSin) );
+
+    var tTran = function(z) {
+      return transformBuilder().
+        translate(0, z * tCos).
+        scale(1, tSin).rotate(pVal).build();
+    };
+    var lTran = function(z, x) {
+      return transformBuilder().
+        translate(-x * pSin, x * pCos * tSin + z * tCos).
+        skewY(lSkewY).scale(pCos, tCos).build();
+    };
+    var rTran = function(z, y) {
+      return transformBuilder().
+        translate(y * pCos, y * pSin * tSin + z * tCos).
+        skewY(rSkewY).scale(pSin, tCos).build();
+    };
+
+    tCir1.attrs({ transform: tTran(-40) });
+    tCir2.attrs({ transform: tTran(-40 - 15) });
+    tRect.attrs({ transform: tTran(-40) });
+    lRect.attrs({ transform: lTran(0, 40) });
+    rRect.attrs({ transform: rTran(0, 40) });
+
+    document.getElementById('pLabel').textContent = p.value;
+    document.getElementById('tLabel').textContent = t.value;
+    document.getElementById('tTranLabel').textContent =
+      'rotate(' + trimNum(-pVal) + ') scale(100 ' + trimNum(tSin * 100) + ')';
+    document.getElementById('lTranLabel').textContent =
+      'scale(' + trimNum(pCos * 100) + ' ' + trimNum(tCos * 100) +
+      ') v-shear(' + trimNum(lSkewY) + ')';
+    document.getElementById('rTranLabel').textContent =
+      'scale(' + trimNum(pSin * 100) + ' ' + trimNum(tCos * 100) +
+      ') v-shear(' + trimNum(rSkewY) + ')';
+  };
+
+  inputHandler();
+  p.addEventListener('input', inputHandler);
+  t.addEventListener('input', inputHandler);
+
+  document.getElementById('download').addEventListener('click', function() {
+    var a = document.createElement('a');
+    document.body.appendChild(a);
+    var content = document.getElementById('svg').
+      innerHTML.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+    a.href = URL.createObjectURL(new Blob([ content ], { type: 'text/svg' }) );
+    a.download = 'brick.svg';
+    a.click();
+    document.body.removeChild(a);
+  });
+});
+
+  </script>
+</head>
+<body>
+<table class="param-table">
+  <tbody>
+    <tr><th>Pan:</th><td id="pLabel" class="deg"></td>
+      <td><input id="p" type="range"
+        min="-90" max="0" step="1" value="-40" /></td></tr>
+    <tr><th>Tilt:</th><td id="tLabel" class="deg"></td>
+      <td><input id="t" type="range"
+        min="0" max="90" step="1" value="30" /></td></tr>
+    <tr><th>Top Transform:</th><td id="tTranLabel" colspan="2"></td></tr>
+    <tr><th>Left Transform:</th><td id="lTranLabel" colspan="2"></td></tr>
+    <tr><th>Right Transform:</th><td id="rTranLabel" colspan="2"></td></tr>
+  </tbody>
+</table>
+<div id="svg"></div>
+<button id="download"> Download SVG </button>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>TOKYO 2020</title>
+  <style>
+
+.tk2020 {
+  position: relative; width: 200px; height: 200px; display: inline-block;
+  vertical-align: top;
+}
+.tk2020::before, .tk2020::after { content: ''; position: absolute; }
+.tk2020::before {
+  left: 66.7%; top: 0%; width: 33.3%; height: 33.3%; border-radius: 50%;
+  background-color: #ccc;
+  transform: scale(3.18, 3.18) translate(-31.3%, 31.3%);
+  opacity: 0.5;
+}
+.tk2020::after {
+  left: 33.3%; top: 0%; width: 33.3%; height: 100%;
+  background-color: #ccc;
+  transform: rotate(-450deg);
+  opacity: 0.5;
+}
+.tk2020, .tk2020 .lt, .tk2020 .rt, .tk2020 .lb, .tk2020 .rb { overflow: hidden; }
+.tk2020 .lt, .tk2020 .rt, .tk2020 .lb, .tk2020 .rb {
+  position: absolute; width:100%; height:100%;
+}
+.tk2020::before, .tk2020::after,
+.tk2020 .lt, .tk2020 .rt, .tk2020 .lb, .tk2020 .rb {
+  transition: 1s transform, 1s opacity, 1s background-color;
+}
+.tk2020 .lt .m, .tk2020 .rb .m {
+  transition: 1s border-color;
+}
+.tk2020 .lt .m, .tk2020 .rt .m, .tk2020 .lb .m, .tk2020 .rb .m {
+  position: absolute; width: 106%; height: 106%;
+  margin: -1000px; border: 1000px solid #ccc; border-radius: 50%;
+}
+.tk2020 .lt .m { left:  63%; top:  63%; }
+.tk2020 .rt .m { left: -69%; top:  63%; }
+.tk2020 .lb .m { left:  63%; top: -69%; }
+.tk2020 .rb .m { left: -69%; top: -69%; }
+
+.tk2020 .lt {
+  left: -66.7%; top: -66.7%;
+  transform: translate(66.7%, 66.7%) rotate(90deg) translate(-66.7%, -66.7%);
+}
+.tk2020 .rt {
+  left: 66.7%; top: -66.7%;
+  transform: translate(-66.7%, 66.7%) rotate(90deg) translate(66.7%, -66.7%);
+}
+.tk2020 .lb {
+  left: -66.7%; top: 66.7%;
+  transform: translate(66.7%, -66.7%) rotate(90deg) translate(-66.7%, 66.7%);
+}
+.tk2020 .rb {
+  left: 66.7%; top:  66.7%;
+  transform: translate(-66.7%, -66.7%) rotate(90deg) translate(66.7%, 66.7%);
+}
+.tk2020:hover .lt .m {
+  border-color: #c90; 
+}
+.tk2020:hover .lt {
+  transform: translate(66.7%, 66.7%) rotate(0deg) translate(-66.7%, -66.7%);
+}
+.tk2020:hover .rt {
+  transform: translate(-66.7%, 66.7%) rotate(0deg) translate(66.7%, -66.7%);
+  opacity: 0;
+}
+.tk2020:hover .lb {
+  transform: translate(66.7%, -66.7%) rotate(0deg) translate(-66.7%, 66.7%);
+  opacity: 0;
+}
+.tk2020:hover .rb {
+  transform: translate(-66.7%, -66.7%) rotate(0deg) translate(66.7%, 66.7%);
+}
+.tk2020:hover::before {
+  background-color: #f00;
+  transform: scale(1, 1) translate(0%, 0%);
+  opacity: 1;
+}
+.tk2020:hover::after {
+  background-color: #000;
+  transform: rotate(0deg);
+  opacity: 1;
+}
+.tk2020:active {
+  background-color: #eee;
+  opacity: 0.8;
+}
+
+  </style>
+</head>
+<body>
+<div class="tk2020">
+  <div class="lt"><div class="m"></div></div>
+  <div class="rt"><div class="m"></div></div>
+  <div class="lb"><div class="m"></div></div>
+  <div class="rb"><div class="m"></div></div>
+</div>
+</body>
+</html>

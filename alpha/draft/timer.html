@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+<head>
+<style>
+#tm {
+  font-family: monospace;
+  font-size:60pt;
+}
+</style>
+<script>
+window.addEventListener('load', function() {
+  var assertEquals = function(e, a) {
+    if (e !== a) {
+      throw 'expected ' + e + ' but ' + a;
+    }
+  }
+  var numToStr = function(n, digits) {
+    digits = digits || 0;
+    var neg = n < 0;
+    if (neg) {
+      n = -n;
+    }
+    var s = '' + n;
+    while (s.length < digits) {
+      s = '0' + s;
+    }
+    return (neg? '-' : '') + s;
+  };
+  var formatTime = function(t) {
+    var neg = t < 0;
+    if (neg) {
+      t = -t;
+    }
+    var m = Math.floor(t / 60);
+    var s = numToStr(t % 60, 2);
+    return m + ':' + s;
+  };
+  var notify = function(msg) {
+    if (Notification.permission == 'granted') {
+      var n = new Notification(msg);
+    }
+  };
+
+  if (!window.Notification) {
+  } else {
+    if (Notification.permission == 'granted') {
+    } else if (Notification.permission == 'denied') {
+    } else {
+      Notification.requestPermission(function(permission) {
+      });
+    }
+  }
+
+  assertEquals('0', numToStr(0) );
+  assertEquals('00', numToStr(0, 2) );
+  assertEquals('00', numToStr(-0, 2) );
+  assertEquals('-01', numToStr(-1, 2) );
+  assertEquals('01', numToStr(1, 2) );
+  var defaultTimeInMin = 180;
+  var timeInMin = defaultTimeInMin;
+  var start = +new Date();
+  var notified = true;
+  var update = function() {
+    var tm = document.getElementById('tm');
+    var t = timeInMin - Math.floor((+new Date() - start) / 1000);
+    tm.textContent = formatTime(t);
+    if (t < 0) {
+      if (!notified) {
+        notify('time up');
+        notified = true;
+      }
+      if (t % 2 == 0) {
+        tm.style.backgroundColor = '#ff0';
+      } else {
+        tm.style.backgroundColor = '#f00';
+      }
+    } else if (t < 60) {
+      tm.style.backgroundColor = '#ff0';
+    }
+    window.setTimeout(update, 200);
+  };
+  update();
+
+  document.addEventListener('mousedown', function(event) {
+    event.preventDefault();
+    var tm = document.getElementById('tm');
+    tm.style.backgroundColor = '';
+    if (notified) {
+      timeInMin = defaultTimeInMin;
+    } else {
+      timeInMin -= 30;
+      if (timeInMin <= 0) {
+        timeInMin = defaultTimeInMin;
+      }
+    }
+    start = +new Date();
+    notified = false;
+  });
+});
+
+</script>
+</head>
+<body>
+  <div id="tm"></div>
+</body>
+</html>

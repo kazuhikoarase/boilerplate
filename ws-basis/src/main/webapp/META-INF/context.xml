@@ -1,0 +1,18 @@
+<Context>
+  <!--
+    <Resource
+      name="jdbc/GLOBAL_APP_DS"
+      auth="Container"
+      type="javax.sql.DataSource"
+      maxActive="20" maxIdle="10" maxWait="-1"
+      driverClassName="org.postgresql.Driver"
+      url="jdbc:postgresql://localhost/testdb"
+      username="wtf"
+      password="wtf"
+    />
+   -->
+  <ResourceLink name="jdbc/APP_DS"
+    global="jdbc/GLOBAL_APP_DS"
+    auth="Container"
+    type="javax.sql.DataSource" />
+</Context>

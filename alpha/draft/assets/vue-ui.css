@@ -1,0 +1,12 @@
+
+.mycomp {
+  width: 10rem;
+  height: 1rem;
+  background-color: rgba(0,0,0,0.5);
+}
+
+.number-input {
+  text-align: right;
+  ime-mode: disabled;
+  width: 50px;
+}

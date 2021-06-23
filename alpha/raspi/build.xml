@@ -1,0 +1,66 @@
+<project default="all" basedir=".">
+
+  <!-- load properties-->
+  <property file="conf/build.properties"/>
+
+  <property name="build" location="build" />
+  <property name="tarfile" value="test.tar.gz" />
+
+  <target name="init">
+    <mkdir dir="${build}" />
+  </target>
+
+  <target name="all" depends="init">
+  </target>
+
+  <target name="settime" depends="init">
+    <tstamp>
+      <format property="time" pattern="yyyy-MM-dd HH:mm:ss" />
+    </tstamp>
+    <sshexec trust="true" failonerror="false"
+      host="${host}" username="${user}" password="${pass}"
+      command="sudo date -s &quot;${time}&quot;"
+      resultproperty="result" outputproperty="out"
+      />
+  </target>
+
+  <target name="export" depends="init">
+
+    <tar destfile="${build}/${tarfile}" compression="gzip">
+      <tarfileset dir="work" prefix="work">
+        <include name="**/*" />
+      </tarfileset>
+    </tar>
+
+    <scp trust="true" failonerror="true"
+      localFile="${build}/${tarfile}"
+      remoteTofile="${user}:${pass}@${host}:~/${tarfile}" />
+
+    <sshexec trust="true" failonerror="false"
+      host="${host}" username="${user}" password="${pass}"
+      command="tar xvzf ${tarfile}"
+      resultproperty="result" outputproperty="out"
+      />
+
+  </target>
+
+  <target name="import" depends="init">
+
+    <sshexec trust="true" failonerror="false"
+      host="${host}" username="${user}" password="${pass}"
+      command="tar
+        --exclude=*/node_modules
+        --exclude=*/WiringPi
+        -cvzf ${tarfile} work"
+      resultproperty="result" outputproperty="out"
+      />
+
+    <scp trust="true" failonerror="true"
+      localTofile="${build}/${tarfile}"
+      remoteFile="${user}:${pass}@${host}:~/${tarfile}" />
+
+    <untar src="${build}/${tarfile}" dest="." compression="gzip" />
+
+  </target>
+
+</project>

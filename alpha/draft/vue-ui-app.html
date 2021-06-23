@@ -1,0 +1,95 @@
+<?xml version="1.0" ?>
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8" />
+  <link rel="stylesheet" href="assets/vue-ui.css" />
+  <style>
+.code {
+  background-color: #ffeedd;
+}
+.word {
+  background-color: #00f;
+}
+.tooltip {
+  position: relative;
+  background-color: #f0f0f0;
+  border: 1px solid #666;
+  border-radius: 8px;
+  padding: 4px;
+  display: inline-block;
+  line-height: 1;
+}
+
+.tooltip::after,
+.tooltip::before {
+  position: absolute;
+  content: "";
+  width: 0px;
+  height: 0px;
+  bottom: 100%;
+  left: 50%;
+  border: solid transparent;
+}
+
+.tooltip::after {
+  margin-left: -8px;
+  border-width: 8px;
+  border-bottom-width: 14px;
+  border-bottom-color: #f0f0f0;
+}
+.tooltip::before {
+  margin-left: -9px;
+  border-width: 9px;
+  border-bottom-width: 15px;
+  border-bottom-color: #666;
+}
+
+  </style>
+  <!-- 
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+   -->
+  <script src="assets/vue.js"></script>
+  <script src="assets/vue-ui.js"></script>
+</head>
+<body>
+<div id="app" >
+  <span class="word">Hello Vue,</span>
+  <mycomp></mycomp>
+  <number-input v-model="data.val1" x="re" ></number-input>
+  +
+  <number-input v-model="data.val2"></number-input>
+  =
+  <number-input v-model="val3"></number-input>
+  <pre class="code">data: {{JSON.stringify(data,null,2)}}</pre>
+  <span class="tooltip">こんにちは</span>
+  <br/>
+  <span class="tooltip">こんにちは</span>
+  <span class="tooltip">こんにちは</span>
+  <span class="intr">aa</span>
+  <tooltip-ui>test</tooltip-ui>
+
+  <tooltip-ui :direction="d"
+   v-for="d in 'Top Bottom Left Right'.split(/\s/g)">{{d}}</tooltip-ui>
+
+</div>
+<script>
+
+new Vue({
+  el: '#app',
+  data: {
+    data: {
+      "val1": 1234,
+      "val2": null
+    }
+  },
+  computed: {
+    val3: function() {
+      return this.data.val1 + this.data.val2;
+    }
+  }
+});
+
+</script>
+</body>
+</html>

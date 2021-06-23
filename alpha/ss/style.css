@@ -1,0 +1,18 @@
+#result TABLE {
+  border-collapse: collapse;
+}
+#result TABLE,
+#result TABLE TD {
+  border: 1px solid #999;
+}
+
+#result TD {
+  font-family: 'Meiryo UI';
+  font-size: 9pt;
+}
+
+#plain {
+  font-family: monospace;
+
+  font-size: 9pt;
+}

@@ -1,0 +1,643 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css">
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Source+Code+Pro&display=swap">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
+    <style>
+
+BODY {
+  margin: 0px;
+  padding: 0px;
+  overflow: hidden;
+  color: #fff;
+  background-color: #333;
+  font-family: 'Meiryo UI', sans;
+  font-size: 10pt;
+}
+
+IFRAME {
+  margin: 0px;
+  padding: 0px;
+  overflow: hidden;
+  border: none;
+}
+
+CODE {
+  font-family: 'Source Code Pro', 'Meiryo UI', monospace;
+}
+
+UL {
+  margin: 0px;
+  padding: 0px 0px 0px 16px;
+}
+
+LI {
+  margin: 0px;
+  padding: 0px;
+}
+
+[v-cloak] {
+  display: none;
+}
+
+#app {
+  position: relative;
+}
+
+H1 {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+H2 {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.nav {
+  position: absolute;
+  border-right: 1px solid #666;
+  overflow: auto;
+}
+
+.navContent {
+  padding: 4px 8px;
+}
+
+.body {
+  position: relative;
+}
+
+.link {
+  cursor: default;
+}
+.link:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+.link.selected {
+  background-color: rgba(255,255,255,0.2);
+}
+
+.tabPane {
+  position: absolute;
+  margin: 2px 0px;
+  cursor: default;
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+.tab {
+  position: relative;
+  display:inline-block;
+  padding: 4px 16px;
+}
+
+.tabSvg {
+  position: absolute;
+  left: 0px; top: 0px;
+  overflow: hidden;
+}
+
+.view {
+  display: none;
+}
+.view.selected {
+  display: block;
+}
+
+.console {
+  position: absolute;
+  margin: 0px; padding: 0px;
+  overflow: auto;
+  font-family: 'Source Code Pro', monospace;
+}
+
+.console .log {
+  padding-left: 8px;
+  line-height: 1.5;
+  border-bottom: 1px solid #666;
+  cursor: default;
+}
+
+.console .log:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+.menu {
+  border-top: 1px solid #666;
+  border-left: 1px solid #666;
+  cursor: default;
+  background-color: #333;
+  box-shadow: 0px -0px 4px 1px rgba(255,255,255,0.2);
+}
+
+.menuItem {
+  border-bottom: 1px solid #666;
+  border-right: 1px solid #666;
+  padding: 2px 8px;
+}
+.menuItem:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+    </style>
+    <title></title>
+  </head>
+  <body>
+    <div id="app" v-cloak>
+      <div ref="nav" class="nav">
+        <div class="navContent">
+          <h1 @click="location.href = 'index.html';">{{appTitle}}</h1>
+          <div v-for="assetsGroup in assetsGroups">
+            <h2>{{assetsGroup.title}}</h2>
+            <ul>
+              <li v-for="assets in assetsGroup.items"
+                 ref="link" class="link" @click="link_clickHandler(assets)">{{assets.title}}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div ref="body" class="body" v-show="selectedTitle">
+        <div ref="tabPane" class="tabPane">
+          <svg ref="tabSvg" class="tabSvg">
+            <linearGradient id="tagGrad" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#ccc"></stop>
+              <stop offset="30%" stop-color="#000" stop-opacity="0.8"></stop>
+              <stop offset="100%" stop-color="#333"></stop>
+            </linearGradient>
+            <path ref="tabPath" v-for="(tab, i) in tabs"></path>
+          </svg>
+          <span ref="tab" class="tab" v-for="(tab, i) in tabs"
+            @mousedown.prevent="selectedTabIndex = i">{{tab.label}}</span>
+        </div>
+        <iframe ref="main" class="view" src="about:blank" @load="main_loadHandler"></iframe>
+        <code-view ref="codeView" class="view"
+          v-for="file in assets.files" :src="assets.base + '/' + file"></code-view>
+        <div ref="console" class="console" @contextmenu="console_contextmenuHandler"></div>
+        <divider ref="hDivider" :value="hDividerPosition" @input="hDivider_inputHandler"></divider>
+      </div>
+      <divider ref="vDivider" orientation="vertical"
+       :value="vDividerPosition" @input="vDivider_inputHandler"></divider>
+      <window-watcher ref="winWatcher" @resize="resizeHandler"></window-watcher>
+    </div>
+    <script>
+
+!function() {
+
+  'use strict';
+
+  // index
+  var indexUrl = 'index.json';
+
+  var ajaxGet = function(url, doneHandler) {
+    var xhr = new window.XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.onreadystatechange = function() {
+      if(xhr.readyState == window.XMLHttpRequest.DONE) {
+        if (xhr.status == 200) {
+          doneHandler(xhr.responseText);
+        }
+      }
+    };
+    xhr.send();
+  };
+
+  var conditionalStyleClass = function(elm, className, condition) {
+    var classes = (elm.getAttribute('class') || '').split(/\s+/g).filter(function(c) {
+      return c != className;
+    });
+    if (condition() ) {
+      classes.push(className);
+    }
+    elm.setAttribute('class', classes.join(' ') );
+  };
+  var pathBuilder = function() {
+    var d = '';
+    return {
+      build: function() { return d; },
+      m: function(x, y) { d += 'M' + x + ' ' + y; return this; },
+      l: function(x, y) { d += 'L' + x + ' ' + y; return this; },
+      q: function(cx,  cy, x, y) { d += 'Q' + cx + ' ' + cy + ' ' + x + ' ' + y; return this; },
+      c: function(cx1, cy1, cx2, cy2, x, y) { d += 'C' + cx1 + ' ' + cy1 + ' ' +
+        cx2 + ' ' + cy2 + ' ' + x + ' ' + y; return this; },
+      z: function() { d += 'Z'; return this; }
+    };
+  };
+
+  Vue.component('divider', {
+    template: '<div style="position: absolute;background-color: #f00;opacity: 0;" @mousedown="mousedownHandler">' +
+        '<div ref="line" style="position: absolute;background-color: #ff0;"></div>' +
+      '</div>',
+    props: {
+      orientation: { default: 'horizontal', type: String },
+      value: { default: 0, type: Number}
+    },
+    watch: {
+      value: function(newVal) {
+        this.updateUI(newVal);
+      }
+    },
+    methods: {
+      updateUI: function(value) {
+        var horizontal = this.orientation != 'vertical';
+        if (horizontal) {
+          Vue.util.extend(this.$el.style, { left: '0px', top: value + 'px' });
+        } else{
+          Vue.util.extend(this.$el.style, { left: value + 'px', top: '0px' });
+        }
+      },
+      mousedownHandler: function(event) {
+        var mousemoveHandler = function(event) {
+          if (horizontal) {
+            this.$emit('input', dragStart.value + event.pageY - dragStart.y);
+          } else{
+            this.$emit('input', dragStart.value + event.pageX - dragStart.x);
+          }
+        }.bind(this);
+        var mouseupHandler = function(event) {
+          document.removeEventListener('mousemove', mousemoveHandler);
+          document.removeEventListener('mouseup', mouseupHandler);
+          block.parentNode.removeChild(block);
+        }.bind(this);
+
+        event.preventDefault();
+        var horizontal = this.orientation != 'vertical';
+        var block = document.createElement('div');
+        Vue.util.extend(block.style, {
+          position: 'absolute', backgroundColor: 'red', opacity: '0',
+          cursor: horizontal? 'row-resize' : 'col-resize',
+          left: '0px', top: '0px',
+          width: this.$el.parentNode.offsetWidth + 'px',
+          height: this.$el.parentNode.offsetHeight + 'px'
+        });
+        this.$el.parentNode.appendChild(block);
+        var dragStart = { x: event.pageX, y: event.pageY, value: this.value };
+        document.addEventListener('mousemove', mousemoveHandler);
+        document.addEventListener('mouseup', mouseupHandler);
+      }
+    },
+    mounted: function() {
+      var horizontal = this.orientation != 'vertical';
+      if (horizontal) {
+        Vue.util.extend(this.$el.style, { height: '5px', marginTop: '-3px', cursor: 'row-resize' });
+        Vue.util.extend(this.$refs.line.style, { left: '0px', top: '2px', width: '100%', height: '1px' });
+      } else{
+        Vue.util.extend(this.$el.style, { width: '5px', marginLeft: '-3px', cursor: 'col-resize' });
+        Vue.util.extend(this.$refs.line.style, { left: '2px', top: '0px', width: '1px', height: '100%' });
+      }
+      this.updateUI(this.value);
+    }
+  });
+
+  Vue.component('window-watcher', {
+    template: '<span style="display:none;"></span>',
+    data: function() {
+      return { alive: false, valid: false };
+    },
+    methods: {
+      invalidate: function() { this.valid = false; }
+    },
+    mounted: function() {
+      this.alive = true;
+      var lastSize = null;
+      var watch = function() {
+        var size = { width: window.innerWidth, height: window.innerHeight };
+        if (!lastSize || lastSize.width != size.width || lastSize.height != size.height) {
+          lastSize = size;
+          this.invalidate();
+        }
+        if (!this.valid) {
+          this.$emit('resize', size);
+          this.valid = true;
+        }
+        if (this.alive) {
+          window.setTimeout(watch, 100);
+        }
+      }.bind(this);
+      watch();
+    },
+    beforeDestroy: function() {
+      this.alive = false;
+    }
+  });
+
+  Vue.component('code-view', {
+    template: '<pre style="overflow:auto;margin:0px;padding:0px;">' +
+      '<code ref="code"></code></pre>',
+    props: { src: { type: String, default: '' } },
+    data: function() { return { mounted: false }; },
+    watch: { code: function() {} },
+    computed: {
+      code: function() {
+        ajaxGet(this.src, function(data) {
+          this.$refs.code.textContent = data;
+          hljs.highlightBlock(this.$refs.code);
+        }.bind(this) );
+        return [ this.mounted, this.src ];
+      }
+    },
+    mounted: function() {
+      this.mounted = true;
+    }
+  });
+
+  new Vue({
+    el: '#app',
+    data: {
+      appTitle: '',
+      assetsGroups: [],
+      selectedTitle: '',
+      assets: {},
+      tabs: [],
+      selectedTabIndex: -1,
+      vDividerPosition: 300,
+      hDividerPosition: 0,
+      consoleHeight: 120
+    },
+    watch: {
+      docTitle: function() {},
+      selectedTabIndex : function(newVal){
+        this.getViews().forEach(function(view, i) {
+          conditionalStyleClass(view, 'selected', function() { return i == newVal; });
+        });
+        this.$refs.winWatcher.invalidate();
+      }
+    },
+    computed: {
+      docTitle: function() {
+        document.title = (this.selectedTitle? this.selectedTitle +  ' - ' : '') + this.appTitle;
+        return [ this.assetGroups , this.selectedTitle ];
+      }
+    },
+    methods: {
+      getViews: function() {
+        return [ this.$refs.main ].concat( (this.$refs.codeView || []).
+            map(function(codeView) { return codeView.$el; }) );
+      },
+      hDivider_inputHandler: function(value) {
+        var height = this.$el.offsetHeight;
+        this.consoleHeight = height - Math.max(0, Math.min(value, height) );
+        this.$refs.winWatcher.invalidate();
+      },
+      main_loadHandler: function() {
+        // hook the console on load.
+        var log = function() {
+          var msg = '';
+          for (var i = 0; i < arguments.length; i += 1) {
+            if (i > 0) {
+              msg += ' ';
+            }
+            var a = arguments[i];
+            if (typeof a == 'object') {
+              msg += JSON.stringify(a);
+            } else {
+              msg += '' + a;
+            }
+          }
+          var log = document.createElement('div');
+          log.setAttribute('class', 'log');
+          log.textContent = msg;
+          this.$refs.console.appendChild(log);
+          this.$refs.console.scrollTop = this.$refs.console.scrollHeight -
+            this.$refs.console.clientHeight;
+        }.bind(this);
+        this.$refs.main.contentWindow.console = {
+          error: function() {
+          },
+          log: log
+        };
+      },
+      resizeHandler: function(size) {
+        Vue.util.extend(this.$el.style, {
+          width: size.width + 'px', height: size.height + 'px'
+        });
+        Vue.util.extend(this.$refs.nav.style, {
+          left: '0px', top: '0px',
+          width: Math.max(0, this.vDividerPosition - 1 /* border */) + 'px',
+          height: size.height + 'px'
+        });
+        var navWidth = this.$refs.nav.offsetWidth;
+        Vue.util.extend(this.$refs.body.style, {
+          left: navWidth + 'px', top: '0px',
+          width: Math.max(0, size.width - navWidth) + 'px',
+          height: size.height + 'px'
+        });
+        Vue.util.extend(this.$refs.vDivider.$el.style, { height: size.height + 'px' });
+        this.resizeBodyHandler({
+          width: this.$refs.body.offsetWidth,
+          height: this.$refs.body.offsetHeight
+        });
+      },
+      resizeBodyHandler: function(size) {
+        this.$refs.console.style.height = this.consoleHeight + 'px';
+        var tabPaneHeight = this.$refs.tabPane.offsetHeight + 4 /* margin */;
+        var consoleHeight = this.$refs.console.offsetHeight;
+        Vue.util.extend(this.$refs.tabPane.style, {
+          left: '0px', top: '0px', width: size.width + 'px'
+        });
+        Vue.util.extend(this.$refs.console.style, {
+          left: '0px', top: Math.max(0, size.height - consoleHeight) + 'px',
+          width: size.width + 'px'
+        });
+        this.getViews().forEach(function(el, i) {
+          Vue.util.extend(el.style, {
+            position: 'absolute', left: '0px', top: tabPaneHeight + 'px',
+            width: size.width + 'px',
+            height: Math.max(0, size.height - tabPaneHeight - consoleHeight) + 'px'
+          });
+        }.bind(this) );
+        Vue.util.extend(this.$refs.hDivider.$el.style, { width: size.width + 'px' });
+        this.hDividerPosition = size.height - this.consoleHeight;
+        if (this.$refs.tab) {
+          this.layoutTabs();
+        }
+      },
+      layoutTabs: function() {
+
+        var coords = [];
+        var x = 0;
+        this.$refs.tab.forEach(function(tab, i) {
+          var width = tab.offsetWidth;
+          var height = tab.offsetHeight;
+          coords.push({ i: i, x: x, width: width, height: height, selected: i == this.selectedTabIndex });
+          x += width;
+        }.bind(this));
+
+        var tabWidth = this.$refs.tabPane.offsetWidth;
+        var tabHeight = this.$refs.tabPane.offsetHeight;
+        this.$refs.tabSvg.setAttribute('width', tabWidth);
+        this.$refs.tabSvg.setAttribute('height', tabHeight);
+
+        coords.filter(function(c) { return !c.selected; }).
+            concat(coords.filter(function(c) { return c.selected; }) ).
+            forEach(function(coord, i) {
+          var tabPath = this.$refs.tabPath[i];
+
+          tabPath.setAttribute('stroke-linecap', 'square');
+          tabPath.setAttribute('stroke-linejoin', 'round');
+          tabPath.setAttribute('stroke', coord.selected? '#ccc' : '#999');
+          tabPath.setAttribute('stroke-width', '1');
+          tabPath.setAttribute('fill', coord.selected? 'url(#tagGrad)' : '#000');
+
+          var lg = 0.5;
+          var x = coord.x + lg;
+          var y = lg;
+          var height = coord.height - lg;
+          var width = coord.width - lg * 2;
+          var gap = 2;
+          tabPath.setAttribute('d', pathBuilder().
+              m(-lg, height + gap).
+              l(-lg, height).
+              l(x, height).
+              l(x, height - 8).
+              c(x, y + 4, x + 4, y, x + 8, y).
+              l(x + width, y). /* - */
+              c(x + width + 8, y, x + width + 8, height, x + width + 24, height).
+              l(tabWidth + lg, height).
+              l(tabWidth + lg, height + gap).build() );
+        }.bind(this));
+      },
+      vDivider_inputHandler: function(value) {
+        this.vDividerPosition = Math.max(0,
+            Math.min(value, this.$el.offsetWidth) );
+        this.$refs.winWatcher.invalidate();
+      },
+      link_clickHandler: function(assets) {
+        location.href='#' + encodeURIComponent(assets.title);
+      },
+      console_contextmenuHandler: function(event) {
+        event.preventDefault();
+
+        var menuConst = {
+          CLEAR: 'Clear console'
+        };
+
+        var menu = document.createElement('DIV');
+        menu.setAttribute('class', 'menu');
+        Vue.util.extend(menu.style, {
+          position: 'absolute',
+          left: event.pageX + 'px',
+          top: event.pageY + 'px'
+        });
+        menu.addEventListener('mousedown', function(event) {
+          event.stopPropagation();
+        });
+
+        var block = document.createElement('DIV');
+        Vue.util.extend(block.style, {
+          position: 'absolute',
+          left: '0px',
+          top: '0px',
+          right: '0px',
+          bottom: '0px',
+          backgroundColor: 'red',
+          opacity: '0'
+        });
+
+        var action = function(command) {
+          if (command == menuConst.CLEAR) {
+            while (this.$refs.console.firstChild ) {
+              this.$refs.console.removeChild(this.$refs.console.firstChild);
+            }
+          }
+        }.bind(this);
+
+        [ menuConst.CLEAR ].forEach(function(label) {
+          var menuItem = document.createElement('DIV');
+          menuItem.setAttribute('class', 'menuItem');
+          menuItem.textContent = label;
+          menuItem.addEventListener('click', function() {
+            action(label);
+            dispose();
+          });
+          menu.appendChild(menuItem);
+        });
+        var mousedownHandler = function(event) {
+          dispose();
+        };
+        var dispose = function() {
+          document.body.removeChild(block);
+          document.body.removeChild(menu);
+          document.removeEventListener('mousedown', mousedownHandler);
+        };
+        document.addEventListener('mousedown', mousedownHandler);
+        document.body.appendChild(block);
+        document.body.appendChild(menu);
+      },
+      hashchangeHandler: function() {
+
+        var selectedTitle = '';
+        try {
+          selectedTitle = decodeURIComponent(location.hash.substring(1) );
+        } catch(e) {
+          // ignore
+        }
+
+        if (this.selecteTitle == selectedTitle) {
+          // current, nothing to do.
+          return;
+        }
+
+        var selectedAssets = null;
+        this.assetsGroups.forEach(function(assetsGroup){
+          assetsGroup.items.forEach(function(assets) {
+            if (assets.title == selectedTitle) {
+              selectedAssets = assets;
+            }
+          });
+        });
+        if (!selectedAssets) {
+          this.$refs.main.src = 'about:blank';
+          return;
+        }
+
+        this.selectedTitle = selectedTitle;
+        this.$refs.link.forEach(function(link, i) {
+          conditionalStyleClass(link, 'selected', function() { return link.textContent == selectedTitle; });
+        });
+        this.assets = selectedAssets;
+        // navigate to first file (index.html)
+        this.$refs.main.src = this.assets.base + '/' + this.assets.files[0];
+        // put files
+        this.tabs = [ { label: 'live' } ].
+          concat(this.assets.files.map(function(file) { return { label: file }; }));
+        // wait for render.
+        this.$nextTick(function() {
+          this.selectedTabIndex = 0;
+        });
+      }
+    },
+    mounted: function() {
+      window.addEventListener('hashchange', this.hashchangeHandler);
+      ajaxGet(indexUrl, function(data) {
+        var index = JSON.parse(data);
+        var defaultFiles = index.defaultFiles;
+        index.assetsGroups.forEach(function(assetsGroup) {
+          assetsGroup.items.forEach(function(assets) {
+            if (!assets.files) {
+              assets.files = defaultFiles;
+            }
+          });
+        });
+        this.appTitle = index.title;
+        this.assetsGroups = index.assetsGroups;
+        // wait for render.
+        this.$nextTick(function() {
+          if (location.hash.length > 1) {
+            this.hashchangeHandler();
+          }
+        });
+      }.bind(this) );
+    }
+  });
+
+}();
+
+    </script>
+  </body>
+</html>

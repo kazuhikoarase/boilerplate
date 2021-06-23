@@ -1,0 +1,3 @@
+# pattern:user:group:mode:path
+*.sh:user1:users:755:/usr/local/bin
+*:user1:users:644:/usr/local/foo/var

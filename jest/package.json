@@ -1,0 +1,48 @@
+{
+  "name": "myapp",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  },
+  "devDependencies": {
+    "vue": "^2.5.17",
+    "jquery": "^3.3.1",
+    "qrcode-generator": "^1.0.0",
+    "del": "^3.0.0",
+    "gulp": "^4.0.0",
+    "gulp-notify": "^3.2.0",
+    "gulp-plumber": "^1.2.1",
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-loader": "^8.0.4",
+    "jest": "^23.6.0",
+    "jest-cli": "^23.6.0",
+    "babel-jest": "^23.6.0",
+    "gulp-jest": "^4.0.2",
+    "@vue/test-utils": "^1.0.0-beta.27",
+    "regenerator-runtime": "^0.13.1",
+    "vue-jest": "^3.0.2",
+    "vue-template-compiler": "^2.5.21",
+    "webpack-stream": "^5.2.1",
+    "vue-loader": "^15.5.0"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env"
+    ]
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "vue"
+    ],
+    "transform": {
+      ".+\\.js$": "babel-jest",
+      ".+\\.vue$": "vue-jest"
+    }
+  }
+}
