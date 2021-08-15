@@ -12,5 +12,8 @@ window.addEventListener('load', function() {
   var svg = svgtk.create(width, height, true);
 
   // TODO
+  svg.append($s('rect').attrs({ 
+    fill: 'red', stroke: 'none',
+    x: 10, y: 10, width: 40, height: 20}) );
 
 });
