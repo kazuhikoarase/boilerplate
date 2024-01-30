@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<head>
+<script>
+window.addEventListener('load', function() {
+  document.querySelector('#t1').textContent =
+    document.querySelector('BODY').namespaceURI;
+  document.querySelector('#t2').textContent =
+    document.querySelector('SVG').namespaceURI;
+});
+</script>
+</head>
+<body>
+<svg width="200" height="100">
+  <rect x="0" y="0" width="100" height="100" fill="red" stroke="none" />
+  <rect x="100" y="0" width="100" height="100" fill="blue" stroke="none" />
+</svg>
+<div id="t1"></div>
+<div id="t2"></div>
+</body>
+</html>
