@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+<script>
+window.addEventListener('load', function() {
+
+  var mm2px = function(n) {
+    return n / 25.4 * 72;
+  };
+
+  var w = 210;
+  var h = 297;
+
+  var svg = document.querySelector('svg');
+  svg.setAttribute('width', mm2px(w) );
+  svg.setAttribute('height', mm2px(h) );
+
+  var ns = svg.namespaceURI;
+
+  var createLine = function(x1, y1, x2, y2) {
+    var path = document.createElementNS(ns, 'path');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', '#000000');
+    path.setAttribute('d', 'M' + x1 + ' ' + y1 + 'L' + x2 + ' ' + y2);
+    return path;
+  };
+
+  svg.appendChild(createLine(0, 0, mm2px(w), mm2px(h) ) );
+  svg.appendChild(createLine(mm2px(w), 0, 0, mm2px(h) ) );
+
+  document.querySelector('#download').addEventListener('click', function() {
+    download('3_A4.svg', document.querySelector('svg') );
+  });
+
+  var download = function(filename, elm) {
+  
+    var elm = elm.cloneNode(true);
+    elm.setAttribute('xmlns', elm.namespaceURI);
+    var data = elm.outerHTML;
+  
+    var blob = new Blob([ data ], { type : 'application/octet-stream' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  
+  };
+});
+
+
+</script>
+</head>
+<body>
+<button id="download"> download </button>
+<br/>
+<svg></svg>
+</body>
+</html>

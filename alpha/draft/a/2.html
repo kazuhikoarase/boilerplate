@@ -9,9 +9,9 @@ window.addEventListener('load', function() {
     document.querySelector('svg').namespaceURI;
 });
 
-var saveData = function() {
+var download = function() {
 
-  var filename = 'test.svg';
+  var filename = '2_test.svg';
 
   var svg = document.querySelector('svg').cloneNode(true);
   svg.setAttribute('xmlns', svg.namespaceURI);
@@ -36,6 +36,6 @@ var saveData = function() {
 </svg>
 <div id="t1"></div>
 <div id="t2"></div>
-<button onclick="saveData()"> save </button>
+<button onclick="download()"> download </button>
 </body>
 </html>
