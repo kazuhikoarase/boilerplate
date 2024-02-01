@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+<script>
+window.addEventListener('load', function() {
+  [
+    { label : '0', title : '' },
+    { label : '1', title : '' },
+    { label : '2', title : '' },
+    { label : '3', title : '' },
+  ].forEach(function(work, i) {
+    if (i > 0) {
+      document.body.appendChild(document.createTextNode(' | ') );
+    }
+    var a = document.createElement('a');
+    a.setAttribute('href', work.label + '.html');
+    a.textContent = work.title || 'untitled';
+    document.body.appendChild(a);
+  });
+});
+</script>
+</head>
+<body>
+<h1>Index</h1>
+</body>
+</html>

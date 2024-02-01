@@ -14,6 +14,7 @@ window.addEventListener('load', function() {
   var svg = document.querySelector('svg');
   svg.setAttribute('width', mm2px(w) );
   svg.setAttribute('height', mm2px(h) );
+  svg.setAttribute('stroke-width', mm2px(0.1) );
 
   var ns = svg.namespaceURI;
 
@@ -49,8 +50,6 @@ window.addEventListener('load', function() {
   
   };
 });
-
-
 </script>
 </head>
 <body>
