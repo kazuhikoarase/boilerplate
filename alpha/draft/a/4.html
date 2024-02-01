@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+<head>
+<script>
+window.addEventListener('load', function() {
+
+  var w = 400;
+  var h = 400;
+
+  var svg = document.querySelector('svg');
+  svg.setAttribute('width', w);
+  svg.setAttribute('height', h);
+  svg.setAttribute('stroke-width', 1);
+
+  var ns = svg.namespaceURI;
+
+  !function() {
+    var rect = document.createElementNS(ns, 'rect');
+    rect.setAttribute('x', 0);
+    rect.setAttribute('y', 0);
+    rect.setAttribute('width', w);
+    rect.setAttribute('height', h);
+    rect.setAttribute('fill', '#f0f0f0');
+    rect.setAttribute('stroke', '#none');
+    svg.appendChild(rect);
+  }();
+
+  var appendCircle = function() {
+    var el = document.createElementNS(ns, 'circle');
+    el.setAttribute('r', 8);
+    el.setAttribute('stroke', '#000000');
+    svg.appendChild(el);
+    var model = {
+      x: 0,
+      y: 0,
+      vx : 0,
+      vy : 0,
+      ax : 0,
+      ay : 0
+    };
+      
+    return {
+      $el : el,
+      model : model,
+      moveTo : function(x, y) {
+        model.x = x;
+        model.y = y;
+        return this;
+      },
+      fill : function(color) {
+        el.setAttribute('fill', color);
+        return this;
+      },
+      step : function(dt) {
+        model.vx += model.ax * dt;
+        model.vy += model.ay * dt;
+        model.x += model.vx * dt;
+        model.y += model.vy * dt;
+        el.setAttribute('cx', model.x);
+        el.setAttribute('cy', model.y);
+      }
+    }.moveTo(0, 0).fill('#ffffff');
+  };
+
+  var c0 = appendCircle().moveTo(w / 2, h / 2 - 50).fill('#ffffff');
+  var c1 = appendCircle().moveTo(w / 2, h / 2 + 50).fill('#ff0000');h
+
+  c0.$el.addEventListener('mousedown', function(event) {
+
+    var mousemoveHandler = function(event) {
+      var dx = event.pageX - dragState.pageX;
+      var dy = event.pageY - dragState.pageY;
+      this.model.x = dragState.x + dx;
+      this.model.y = dragState.y + dy;
+    }.bind(this);
+
+    var mouseupHandler = function(event) {
+      document.removeEventListener('mousemove', mousemoveHandler);
+      document.removeEventListener('mouseup', mouseupHandler);
+    }.bind(this);
+
+    var dragState = {
+      pageX : event.pageX,
+      pageY : event.pageY,
+      x : this.model.x,
+      y : this.model.y
+    };
+    document.addEventListener('mousemove', mousemoveHandler);
+    document.addEventListener('mouseup', mouseupHandler);
+  }.bind(c0) );
+
+  !function() {
+    var lastTime = null;
+    var enterFrame = function(time) {
+      if (lastTime !== null) {
+        var dt = time - lastTime;
+        [c0, c1].forEach(function(comp) {
+          comp.step(dt);
+        });
+      }
+      lastTime = time;
+      window.requestAnimationFrame(enterFrame);
+    };
+    window.requestAnimationFrame(enterFrame);
+  }();
+});
+</script>
+</head>
+<body>
+<svg></svg>
+</body>
+</html>
