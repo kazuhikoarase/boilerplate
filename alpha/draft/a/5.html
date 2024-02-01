@@ -97,31 +97,59 @@ window.addEventListener('load', function() {
 
   var f = function(c1, c2) {
 
-    var k = 1E-5;
-    var l = 20;
-
     var step = c2.step;
     c2.step = function(dt) {
       step(dt);
-      var ang = function() {
-        var dx = c2.model.x - c1.model.x; 
-        var dy = c2.model.y - c1.model.y; 
-        return Math.atan2(dy, dx);
+
+      var ax = 0;
+      var ay = 0;
+
+      !function() {
+        var k = 1E-5;
+        var l = 20;
+        var ang = function() {
+          var dx = c2.model.x - c1.model.x; 
+          var dy = c2.model.y - c1.model.y; 
+          return Math.atan2(dy, dx);
+        }();
+        var len = function() {
+          var dx = c2.model.x - c1.model.x; 
+          var dy = c2.model.y - c1.model.y; 
+          return Math.sqrt(dx * dx + dy * dy);
+        }();
+        var x = len - l;
+        if (x > 0) {
+          ax += -k * x * Math.cos(ang);
+          ay += -k * x * Math.sin(ang);
+        }
       }();
-      var len = function() {
-        var dx = c2.model.x - c1.model.x; 
-        var dy = c2.model.y - c1.model.y; 
-        return Math.sqrt(dx * dx + dy * dy);
+
+      !function() {
+        var a = 1E-2;
+        var ang = function() {
+          var dx = c2.model.vx;
+          var dy = c2.model.vy;
+          return Math.atan2(dy, dx);
+        }();
+        var len = function() {
+          var dx = c2.model.vx;
+          var dy = c2.model.vy;
+          return Math.sqrt(dx * dx + dy * dy);
+        }();
+        ax += -a * len * Math.cos(ang);
+        ay += -a * len * Math.sin(ang);
       }();
-      var x = len - l;
-      if (x > 0) {
-        c2.model.ax = -k * x * Math.cos(ang);
-        c2.model.ay = -k * x * Math.sin(ang);
-      }
+
+      c2.model.ax = ax;
+      c2.model.ay = ay;
     }
   };
 
   f(c1, c2);
+  f(c2, c1);
+
+  f(c2, c0);
+  f(c0, c2);
 
   var comps = [c0, c1, c2];
 
