@@ -62,32 +62,37 @@ window.addEventListener('load', function() {
     }.moveTo(0, 0).fill('#ffffff');
   };
 
-  var c0 = appendCircle().moveTo(w / 2, h / 2 - 50).fill('#ffffff');
-  var c1 = appendCircle().moveTo(w / 2, h / 2 + 50).fill('#ff0000');h
+  var movable = function(comp) {
+    comp.$el.addEventListener('mousedown', function(event) {
+  
+      var mousemoveHandler = function(event) {
+        var dx = event.pageX - dragState.pageX;
+        var dy = event.pageY - dragState.pageY;
+        comp.model.x = dragState.x + dx;
+        comp.model.y = dragState.y + dy;
+      };
 
-  c0.$el.addEventListener('mousedown', function(event) {
+      var mouseupHandler = function(event) {
+        document.removeEventListener('mousemove', mousemoveHandler);
+        document.removeEventListener('mouseup', mouseupHandler);
+      };
 
-    var mousemoveHandler = function(event) {
-      var dx = event.pageX - dragState.pageX;
-      var dy = event.pageY - dragState.pageY;
-      this.model.x = dragState.x + dx;
-      this.model.y = dragState.y + dy;
-    }.bind(this);
+      var dragState = {
+        pageX : event.pageX,
+        pageY : event.pageY,
+        x : comp.model.x,
+        y : comp.model.y
+      };
+      document.addEventListener('mousemove', mousemoveHandler);
+      document.addEventListener('mouseup', mouseupHandler);
+    } );
+  };
 
-    var mouseupHandler = function(event) {
-      document.removeEventListener('mousemove', mousemoveHandler);
-      document.removeEventListener('mouseup', mouseupHandler);
-    }.bind(this);
+  var c0 = appendCircle().moveTo(w / 2, h / 2 - 50).fill('#0000ff');
+  var c1 = appendCircle().moveTo(w / 2, h / 2 + 50).fill('#ffff00');h
 
-    var dragState = {
-      pageX : event.pageX,
-      pageY : event.pageY,
-      x : this.model.x,
-      y : this.model.y
-    };
-    document.addEventListener('mousemove', mousemoveHandler);
-    document.addEventListener('mouseup', mouseupHandler);
-  }.bind(c0) );
+  movable(c0);
+  movable(c1);
 
   !function() {
     var lastTime = null;
