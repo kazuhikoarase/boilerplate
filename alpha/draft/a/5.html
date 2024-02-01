@@ -90,11 +90,40 @@ window.addEventListener('load', function() {
 
   var c0 = appendCircle().moveTo(w / 2, h / 2 - 50).fill('#0000ff');
   var c1 = appendCircle().moveTo(w / 2, h / 2 + 50).fill('#ffff00');h
+  var c2 = appendCircle().moveTo(w / 2, h / 2).fill('#ff0000');h
 
   movable(c0);
   movable(c1);
 
-  var comps = [c0, c1];
+  var f = function(c1, c2) {
+
+    var k = 1E-5;
+    var l = 20;
+
+    var step = c2.step;
+    c2.step = function(dt) {
+      step(dt);
+      var ang = function() {
+        var dx = c2.model.x - c1.model.x; 
+        var dy = c2.model.y - c1.model.y; 
+        return Math.atan2(dy, dx);
+      }();
+      var len = function() {
+        var dx = c2.model.x - c1.model.x; 
+        var dy = c2.model.y - c1.model.y; 
+        return Math.sqrt(dx * dx + dy * dy);
+      }();
+      var x = len - l;
+      if (x > 0) {
+        c2.model.ax = -k * x * Math.cos(ang);
+        c2.model.ay = -k * x * Math.sin(ang);
+      }
+    }
+  };
+
+  f(c1, c2);
+
+  var comps = [c0, c1, c2];
 
   !function() {
     var lastTime = null;
