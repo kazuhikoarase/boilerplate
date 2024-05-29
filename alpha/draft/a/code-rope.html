@@ -18,22 +18,27 @@ var update = function() {
     return document.createElementNS(svg.namespaceURI, tagName);
   };
 
-  var pathBuilder = function() {
+  var pathBuilder = function(mat) {
+    var mat = mat || mat3();
     var d = '';
     return {
       moveTo : function(x, y) {
-        d += 'M' + x + ' ' + y;
+        var p = mat.transform(x, y);
+        d += 'M' + p[0] + ' ' + p[1];
         return this;
       },
       lineTo : function(x, y) {
-        d += 'L' + x + ' ' + y;
+        var p = mat.transform(x, y);
+        d += 'L' + p[0] + ' ' + p[1];
         return this;
       },
       quadTo : function(cx, cy, x, y) {
-        d += 'Q' + cx + ' ' + cy + ' ' + x + ' ' + y;
+        var c = mat.transform(cx, cy);
+        var p = mat.transform(x, y);
+        d += 'Q' + c[0] + ' ' + c[1] + ' ' + p[0] + ' ' + p[1];
         return this;
       },
-      close : function(x, y) {
+      close : function() {
         d += 'Z';
         return this;
       },
@@ -43,13 +48,52 @@ var update = function() {
     }
   };
 
+  var mat3 = function(mat) {
+    var _mat = mat || [1, 0, 0, 0, 1, 0, 0, 0, 1];
+    return {
+      translate : function(tx, ty) {
+        return this.concat([
+          1, 0, tx,
+          0, 1, ty,
+          0, 0, 1
+        ]);
+      },
+      rotate : function(t) {
+        return this.concat([
+           Math.cos(t), Math.sin(t), 0,
+          -Math.sin(t), Math.cos(t), 0,
+           0, 0, 1
+        ]);
+      },
+      concat : function(m) {
+        return mat3([
+          _mat[0] * m[0] + _mat[1] * m[3] + _mat[2] * m[6],
+          _mat[0] * m[1] + _mat[1] * m[4] + _mat[2] * m[7],
+          _mat[0] * m[2] + _mat[1] * m[5] + _mat[2] * m[8],
+          _mat[3] * m[0] + _mat[4] * m[3] + _mat[5] * m[6],
+          _mat[3] * m[1] + _mat[4] * m[4] + _mat[5] * m[7],
+          _mat[3] * m[2] + _mat[4] * m[5] + _mat[5] * m[8],
+          _mat[6] * m[0] + _mat[7] * m[3] + _mat[8] * m[6],
+          _mat[6] * m[1] + _mat[7] * m[4] + _mat[8] * m[7],
+          _mat[6] * m[2] + _mat[7] * m[5] + _mat[8] * m[8],
+        ]);
+      },
+      transform : function(x, y) {
+        return [
+          _mat[0] * x + _mat[1] * y + _mat[2],
+          _mat[3] * x + _mat[4] * y + _mat[5]
+        ];
+      }
+    };
+  };
+
   // remove all
   while (svg.firstChild) {
     svg.removeChild(svg.firstChild);
   }
 
-  var width = 500;
-  var height = 500;
+  var width = 800;
+  var height = 600;
   svg.setAttribute('width', width);
   svg.setAttribute('height', height);
 
@@ -66,13 +110,10 @@ var update = function() {
   var ch = 20;
   var cc = 60;
 
-  var rot = -180 * Math.atan2(ch, cc) / Math.PI;
+  var rot = Math.atan2(ch, cc);
 
   var grp = crtSvg('g');
-  grp.setAttribute('transform',
-      'translate(' + width / 2 + ' ' + height / 2 + ')rotate(' + rot + ')');
   svg.appendChild(grp);
-
 
   var appendChain = function(x, y) {
     var path = crtSvg('path');
@@ -80,31 +121,41 @@ var update = function() {
     path.setAttribute('stroke-width', '1.5');
 //    path.setAttribute('fill', '#ddd');
     path.setAttribute('fill', 'rgba(0,0,0,0.2)');
-    path.setAttribute('d', pathBuilder().
-        moveTo(-cw / 2 - cc + x, -ch / 2 + y).
-        lineTo( cw / 2 + x, -ch / 2 + y).
-        quadTo( cw / 2 + cc + x, -ch / 2 + y, cw / 2 + cc + x, ch / 2 + y).
-        lineTo(-cw / 2 + x,  ch / 2 + y).
-        quadTo(-cw / 2 - cc + x, ch / 2 + y, -cw / 2 - cc + x, -ch / 2 + y).
+    var mat = mat3();
+    mat = mat.translate(width / 2, height / 2);
+    mat = mat.rotate(Math.atan2(ch, cc) );
+    mat = mat.translate(x, y);
+    path.setAttribute('d', pathBuilder(mat).
+        moveTo(-cw / 2 - cc, -ch / 2).
+        lineTo( cw / 2, -ch / 2).
+        quadTo( cw / 2 + cc, -ch / 2, cw / 2 + cc, ch / 2).
+        lineTo(-cw / 2,  ch / 2).
+        quadTo(-cw / 2 - cc, ch / 2, -cw / 2 - cc, -ch / 2).
         close().
         build() );
     grp.appendChild(path);
   };
 
+  var appendPath = function(x, y) {
+    var path = crtSvg('path');
+    var mat = mat3();
+    mat = mat.translate(x, y);
+    path.setAttribute('d', pathBuilder(mat).
+        moveTo(-rw / 2, -rh / 2).lineTo(-rw / 2,  rh / 2).build() );
+    path.setAttribute('stroke', '#f00');
+    path.setAttribute('fill', 'none');
+    svg.appendChild(path);
+  };
+
   var p = 5;
+  var rw = (cw + cc) * Math.cos(rot) / 2;
+  var rh = 100;
+
   for (var i = -p; i <= p; i += 1) {
     appendChain(cc * i, ch * i);
+    appendPath(width / 2 + (i - 0.5) * rw, height / 2);
   }
-  var rw = (cw + cc) * Math.cos(rot);
-  var rh = 100;
-  var rect = crtSvg('rect');
-  rect.setAttribute('x', width / 2 - rw / 2);
-  rect.setAttribute('y', height / 2 - rh / 2);
-  rect.setAttribute('width', rw / 2);
-  rect.setAttribute('height', rh);
-  rect.setAttribute('stroke', 'none');
-  rect.setAttribute('fill', 'rgba(0,0,0,0.2)');
-  svg.appendChild(rect);
+
 };
 
 var download = function() {
