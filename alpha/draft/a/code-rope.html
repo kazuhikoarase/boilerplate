@@ -92,8 +92,8 @@ var update = function() {
     svg.removeChild(svg.firstChild);
   }
 
-  var width = 800;
-  var height = 600;
+  var width = 500;
+  var height = 400;
   svg.setAttribute('width', width);
   svg.setAttribute('height', height);
 
@@ -125,7 +125,7 @@ var update = function() {
           quadTo(-cw / 2 - cc, ch / 2, -cw / 2 - cc, -ch / 2).
           close().
           build() );
-      grp.appendChild(path);
+      grpC.appendChild(path);
     };
 
     var appendPath = function(x, y) {
@@ -136,17 +136,21 @@ var update = function() {
           moveTo(-rw / 2, -rh / 2).lineTo(-rw / 2,  rh / 2).build() );
       path.setAttribute('stroke', '#f00');
       path.setAttribute('fill', 'none');
-      svg.appendChild(path);
+      grpP.appendChild(path);
     };
 
-    var cw = params.cw;
-    var ch = params.ch;
-    var cc = params.cc;
+    var ch = params.w * Math.sin(params.t / 180 * Math.PI);
+    var cc = params.w * Math.cos(params.t / 180 * Math.PI);
+    var cw = params.h / Math.sin(params.t / 180 * Math.PI) - cc;
     var vGap = 8;
     var rot = Math.atan2(ch, cc);
     var rw = ch / Math.sin(rot);
     var rh = (cw + cc * 2) * Math.sin(rot) + vGap * 2;
     var getX = function(i) { return params.x + rw * i; };
+
+    if (isNaN(rw) || rw < 10) {
+      throw 'rw:' + rw;
+    }
 
     var i;
     var min = 0;
@@ -167,6 +171,17 @@ var update = function() {
       }
     }
 
+    var grpC = crtSvg('g');
+    var grpP = crtSvg('g');
+    var grp = crtSvg('g');
+    grp.appendChild(grpC);
+    grp.appendChild(grpP);
+    svg.appendChild(grp);
+
+    grpC.setAttribute('id', 'body');
+    grpP.setAttribute('id', 'split');
+    grp.setAttribute('id', 'ptn_' + params.w + '_' + params.w + '_' + params.t);
+
     for (i = min; i <= max; i += 1) {
       var x = getX(i);
       appendChain(cc * i, ch * i);
@@ -176,11 +191,16 @@ var update = function() {
     return rh;
   };
 
-  var grp = crtSvg('g');
-  svg.appendChild(grp);
-
+  var x = width / 2;
   var y = 80;
   var vGap = 16;
+  y += appendCode({ w : 30, h : 20, t : 45, x : x, y : y });
+  y += vGap;
+  y += appendCode({ w : 30, h : 30, t : 45, x : x, y : y });
+  y += vGap;
+  y += appendCode({ w : 30, h : 30, t : 30, x : x, y : y });
+  y += vGap;
+  /*
   y += appendCode({ cw : 10, ch : 20, cc : 20, x : width / 2, y : y });
   y += vGap;
   y += appendCode({ cw : 20, ch : 20, cc : 20, x : width / 2, y : y });
@@ -189,7 +209,7 @@ var update = function() {
   y += vGap;
   y += appendCode({ cw : 40, ch : 20, cc : 40, x : width / 2, y : y });
   y += vGap;
-
+*/
 };
 
 var download = function() {
