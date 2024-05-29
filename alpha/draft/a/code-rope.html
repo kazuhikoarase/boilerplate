@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+<head>
+<script>
+window.addEventListener('load', function() {
+  document.querySelector('#t1').textContent =
+    document.querySelector('BODY').namespaceURI;
+  document.querySelector('#t2').textContent =
+    document.querySelector('svg').namespaceURI;
+  update();
+});
+
+var update = function() {
+
+  var svg = document.querySelector('svg');
+
+  var crtSvg = function(tagName) {
+    return document.createElementNS(svg.namespaceURI, tagName);
+  };
+
+  var pathBuilder = function() {
+    var d = '';
+    return {
+      moveTo : function(x, y) {
+        d += 'M' + x + ' ' + y;
+        return this;
+      },
+      lineTo : function(x, y) {
+        d += 'L' + x + ' ' + y;
+        return this;
+      },
+      quadTo : function(cx, cy, x, y) {
+        d += 'Q' + cx + ' ' + cy + ' ' + x + ' ' + y;
+        return this;
+      },
+      close : function(x, y) {
+        d += 'Z';
+        return this;
+      },
+      build : function() {
+        return d;
+      }
+    }
+  };
+
+  // remove all
+  while (svg.firstChild) {
+    svg.removeChild(svg.firstChild);
+  }
+
+  var width = 500;
+  var height = 500;
+  svg.setAttribute('width', width);
+  svg.setAttribute('height', height);
+
+  var bg = crtSvg('rect');
+  bg.setAttribute('x', 0);
+  bg.setAttribute('y', 0);
+  bg.setAttribute('width', width);
+  bg.setAttribute('height', height);
+  bg.setAttribute('stroke', 'none');
+  bg.setAttribute('fill', '#f0f0f0');
+  svg.appendChild(bg);
+
+  var cw = 80;
+  var ch = 20;
+  var cc = 60;
+
+  var rot = -180 * Math.atan2(ch, cc) / Math.PI;
+
+  var grp = crtSvg('g');
+  grp.setAttribute('transform',
+      'translate(' + width / 2 + ' ' + height / 2 + ')rotate(' + rot + ')');
+  svg.appendChild(grp);
+
+
+  var appendChain = function(x, y) {
+    var path = crtSvg('path');
+    path.setAttribute('stroke', '#000');
+    path.setAttribute('stroke-width', '1.5');
+//    path.setAttribute('fill', '#ddd');
+    path.setAttribute('fill', 'rgba(0,0,0,0.2)');
+    path.setAttribute('d', pathBuilder().
+        moveTo(-cw / 2 - cc + x, -ch / 2 + y).
+        lineTo( cw / 2 + x, -ch / 2 + y).
+        quadTo( cw / 2 + cc + x, -ch / 2 + y, cw / 2 + cc + x, ch / 2 + y).
+        lineTo(-cw / 2 + x,  ch / 2 + y).
+        quadTo(-cw / 2 - cc + x, ch / 2 + y, -cw / 2 - cc + x, -ch / 2 + y).
+        close().
+        build() );
+    grp.appendChild(path);
+  };
+
+  var p = 5;
+  for (var i = -p; i <= p; i += 1) {
+    appendChain(cc * i, ch * i);
+  }
+  var rw = (cw + cc) * Math.cos(rot);
+  var rh = 100;
+  var rect = crtSvg('rect');
+  rect.setAttribute('x', width / 2 - rw / 2);
+  rect.setAttribute('y', height / 2 - rh / 2);
+  rect.setAttribute('width', rw / 2);
+  rect.setAttribute('height', rh);
+  rect.setAttribute('stroke', 'none');
+  rect.setAttribute('fill', 'rgba(0,0,0,0.2)');
+  svg.appendChild(rect);
+};
+
+var download = function() {
+
+  var filename = '2_test.svg';
+
+  var svg = document.querySelector('svg').cloneNode(true);
+  svg.setAttribute('xmlns', svg.namespaceURI);
+  var data = svg.outerHTML;
+
+  var blob = new Blob([ data ], { type : 'application/octet-stream' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+};
+</script>
+</head>
+<body>
+<button onclick="download()"> download </button>
+<br/>
+<svg width="200" height="100">
+  <rect x="0" y="0" width="100" height="100" fill="red" stroke="none" />
+  <rect x="100" y="0" width="100" height="100" fill="blue" stroke="none" />
+</svg>
+<div id="t1"></div>
+<div id="t2"></div>
+</body>
+</html>
