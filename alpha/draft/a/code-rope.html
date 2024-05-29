@@ -106,55 +106,89 @@ var update = function() {
   bg.setAttribute('fill', '#f0f0f0');
   svg.appendChild(bg);
 
-  var cw = 80;
-  var ch = 20;
-  var cc = 60;
+  var appendCode = function(params) {
 
-  var rot = Math.atan2(ch, cc);
+    var appendChain = function(x, y) {
+      var path = crtSvg('path');
+      path.setAttribute('stroke', '#000');
+      path.setAttribute('stroke-width', '1.5');
+      path.setAttribute('fill', '#ddd');
+      var mat = mat3();
+      mat = mat.translate(params.x, params.y);
+      mat = mat.rotate(Math.atan2(ch, cc) );
+      mat = mat.translate(x, y);
+      path.setAttribute('d', pathBuilder(mat).
+          moveTo(-cw / 2 - cc, -ch / 2).
+          lineTo( cw / 2, -ch / 2).
+          quadTo( cw / 2 + cc, -ch / 2, cw / 2 + cc, ch / 2).
+          lineTo(-cw / 2,  ch / 2).
+          quadTo(-cw / 2 - cc, ch / 2, -cw / 2 - cc, -ch / 2).
+          close().
+          build() );
+      grp.appendChild(path);
+    };
+
+    var appendPath = function(x, y) {
+      var path = crtSvg('path');
+      var mat = mat3();
+      mat = mat.translate(x, y);
+      path.setAttribute('d', pathBuilder(mat).
+          moveTo(-rw / 2, -rh / 2).lineTo(-rw / 2,  rh / 2).build() );
+      path.setAttribute('stroke', '#f00');
+      path.setAttribute('fill', 'none');
+      svg.appendChild(path);
+    };
+
+    var cw = params.cw;
+    var ch = params.ch;
+    var cc = params.cc;
+    var vGap = 8;
+    var rot = Math.atan2(ch, cc);
+    var rw = ch / Math.sin(rot);
+    var rh = (cw + cc * 2) * Math.sin(rot) + vGap * 2;
+    var getX = function(i) { return params.x + rw * i; };
+
+    var i;
+    var min = 0;
+    var max = 0;
+
+    for (i = 0; ; i += 1) {
+      var x = getX(i);
+      if (x > width) {
+        max = i;
+        break;
+      }
+    }
+    for (i = -1; ; i -= 1) {
+      var x = getX(i);
+      if (x + rw < 0) {
+        min = i;
+        break;
+      }
+    }
+
+    for (i = min; i <= max; i += 1) {
+      var x = getX(i);
+      appendChain(cc * i, ch * i);
+      appendPath(x, params.y);
+    }
+
+    return rh;
+  };
 
   var grp = crtSvg('g');
   svg.appendChild(grp);
 
-  var appendChain = function(x, y) {
-    var path = crtSvg('path');
-    path.setAttribute('stroke', '#000');
-    path.setAttribute('stroke-width', '1.5');
-//    path.setAttribute('fill', '#ddd');
-    path.setAttribute('fill', 'rgba(0,0,0,0.2)');
-    var mat = mat3();
-    mat = mat.translate(width / 2, height / 2);
-    mat = mat.rotate(Math.atan2(ch, cc) );
-    mat = mat.translate(x, y);
-    path.setAttribute('d', pathBuilder(mat).
-        moveTo(-cw / 2 - cc, -ch / 2).
-        lineTo( cw / 2, -ch / 2).
-        quadTo( cw / 2 + cc, -ch / 2, cw / 2 + cc, ch / 2).
-        lineTo(-cw / 2,  ch / 2).
-        quadTo(-cw / 2 - cc, ch / 2, -cw / 2 - cc, -ch / 2).
-        close().
-        build() );
-    grp.appendChild(path);
-  };
-
-  var appendPath = function(x, y) {
-    var path = crtSvg('path');
-    var mat = mat3();
-    mat = mat.translate(x, y);
-    path.setAttribute('d', pathBuilder(mat).
-        moveTo(-rw / 2, -rh / 2).lineTo(-rw / 2,  rh / 2).build() );
-    path.setAttribute('stroke', '#f00');
-    path.setAttribute('fill', 'none');
-    svg.appendChild(path);
-  };
-
-  var p = 5;
-  var rw = (cw + cc) * Math.cos(rot) / 2;
-  var rh = 100;
-
-  for (var i = -p; i <= p; i += 1) {
-    appendChain(cc * i, ch * i);
-    appendPath(width / 2 + (i - 0.5) * rw, height / 2);
-  }
+  var y = 80;
+  var vGap = 16;
+  y += appendCode({ cw : 10, ch : 20, cc : 20, x : width / 2, y : y });
+  y += vGap;
+  y += appendCode({ cw : 20, ch : 20, cc : 20, x : width / 2, y : y });
+  y += vGap;
+  y += appendCode({ cw : 40, ch : 20, cc : 20, x : width / 2, y : y });
+  y += vGap;
+  y += appendCode({ cw : 40, ch : 20, cc : 40, x : width / 2, y : y });
+  y += vGap;
 
 };
 
