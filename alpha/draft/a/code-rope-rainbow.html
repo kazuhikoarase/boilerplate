@@ -128,12 +128,13 @@ var update = function() {
       grpC.appendChild(path);
     };
 
-    var appendPath = function(x, y) {
+    var appendPath = function(x, y, bold) {
       var path = crtSvg('path');
       var mat = mat3();
       mat = mat.translate(x, y);
       path.setAttribute('d', pathBuilder(mat).
           moveTo(-rw / 2, -rh / 2).lineTo(-rw / 2,  rh / 2).build() );
+      path.setAttribute('stroke-width', bold? 3 : 1);
       path.setAttribute('stroke', '#f00');
       path.setAttribute('fill', 'none');
       grpP.appendChild(path);
@@ -191,7 +192,7 @@ var update = function() {
     for (i = min; i <= max; i += 1) {
       var x = getX(i);
       appendChain(cc * i, ch * i, (hueOffset + hue) % 360);
-      appendPath(x, params.y);
+      appendPath(x, params.y, hue == 30);
       hue = (hue + hueStep) % hueLength;
     }
 
@@ -237,15 +238,19 @@ var update = function() {
   var hueOffset = 330;
   var hueStep = 10;
   var size = 40;
-  y += appendCode({ w : 30, h : size, t : 15, x : x, y : y, hueOffset : hueOffset, hueStep : hueStep, hueLength : 360 });
+  var unit = 20;
+  var angle = 25;
+  var hx = 0;
+
+  y += appendCode({ w : unit, h : size, t : angle, x : x, y : y, hueOffset : hueOffset, hueStep : hueStep, hueLength : 360 });
   y += vGap;
-  y += appendCode({ w : 30, h : size, t : 15, x : x, y : y, hueOffset : hueOffset, hueStep : hueStep, hueLength : 90 });
+  y += appendCode({ w : unit, h : size, t : angle, x : x, y : y, hueOffset : hueOffset + 0 + hx, hueStep : hueStep, hueLength : 90 });
   y += vGap;
-  y += appendCode({ w : 30, h : size, t : 15, x : x, y : y, hueOffset : hueOffset + 90, hueStep : hueStep, hueLength : 90 });
+  y += appendCode({ w : unit, h : size, t : angle, x : x, y : y, hueOffset : hueOffset + 90, hueStep : hueStep, hueLength : 90 });
   y += vGap;
-  y += appendCode({ w : 30, h : size, t : 15, x : x, y : y, hueOffset : hueOffset + 180, hueStep : hueStep, hueLength : 90 });
+  y += appendCode({ w : unit, h : size, t : angle, x : x, y : y, hueOffset : hueOffset + 180 + hx, hueStep : hueStep, hueLength : 90 });
   y += vGap;
-  y += appendCode({ w : 30, h : size, t : 15, x : x, y : y, hueOffset : hueOffset + 270, hueStep : hueStep, hueLength : 90 });
+  y += appendCode({ w : unit, h : size, t : angle, x : x, y : y, hueOffset : hueOffset + 270, hueStep : hueStep, hueLength : 90 });
   y += vGap;
 
 };
