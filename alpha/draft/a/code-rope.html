@@ -87,31 +87,12 @@ var update = function() {
     };
   };
 
-  // remove all
-  while (svg.firstChild) {
-    svg.removeChild(svg.firstChild);
-  }
-
-  var width = 500;
-  var height = 400;
-  svg.setAttribute('width', width);
-  svg.setAttribute('height', height);
-
-  var bg = crtSvg('rect');
-  bg.setAttribute('x', 0);
-  bg.setAttribute('y', 0);
-  bg.setAttribute('width', width);
-  bg.setAttribute('height', height);
-  bg.setAttribute('stroke', 'none');
-  bg.setAttribute('fill', '#f0f0f0');
-  svg.appendChild(bg);
-
   var appendCode = function(params) {
 
     var appendChain = function(x, y) {
       var path = crtSvg('path');
       path.setAttribute('stroke', '#000');
-      path.setAttribute('stroke-width', '1.5');
+      path.setAttribute('stroke-width', '2');
       path.setAttribute('fill', '#ddd');
       var mat = mat3();
       mat = mat.translate(params.x, params.y);
@@ -180,7 +161,8 @@ var update = function() {
 
     grpC.setAttribute('id', 'body');
     grpP.setAttribute('id', 'split');
-    grp.setAttribute('id', 'ptn_' + params.w + '_' + params.w + '_' + params.t);
+    grp.setAttribute('id',
+        'ptn_' + params.w + '_' + params.w + '_' + params.t);
 
     for (i = min; i <= max; i += 1) {
       var x = getX(i);
@@ -191,25 +173,41 @@ var update = function() {
     return rh;
   };
 
+  // remove all
+  while (svg.firstChild) {
+    svg.removeChild(svg.firstChild);
+  }
+
+  var width = 480;
+  var height = 480;
+  svg.setAttribute('width', width);
+  svg.setAttribute('height', height);
+
+  var bg = crtSvg('rect');
+  bg.setAttribute('x', 0);
+  bg.setAttribute('y', 0);
+  bg.setAttribute('width', width);
+  bg.setAttribute('height', height);
+  bg.setAttribute('stroke', 'none');
+  bg.setAttribute('fill', '#f0f0f0');
+  svg.appendChild(bg);
+
   var x = width / 2;
-  var y = 80;
-  var vGap = 16;
+  var y = 40;
+  var vGap = 24;
+  y += appendCode({ w : 20, h : 20, t : 45, x : x, y : y });
+  y += vGap;
+  y += appendCode({ w : 20, h : 30, t : 45, x : x, y : y });
+  y += vGap;
   y += appendCode({ w : 30, h : 20, t : 45, x : x, y : y });
   y += vGap;
   y += appendCode({ w : 30, h : 30, t : 45, x : x, y : y });
   y += vGap;
   y += appendCode({ w : 30, h : 30, t : 30, x : x, y : y });
   y += vGap;
-  /*
-  y += appendCode({ cw : 10, ch : 20, cc : 20, x : width / 2, y : y });
+  y += appendCode({ w : 30, h : 30, t : 20, x : x, y : y });
   y += vGap;
-  y += appendCode({ cw : 20, ch : 20, cc : 20, x : width / 2, y : y });
-  y += vGap;
-  y += appendCode({ cw : 40, ch : 20, cc : 20, x : width / 2, y : y });
-  y += vGap;
-  y += appendCode({ cw : 40, ch : 20, cc : 40, x : width / 2, y : y });
-  y += vGap;
-*/
+
 };
 
 var download = function() {
