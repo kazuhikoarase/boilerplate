@@ -1,0 +1,2 @@
+https://cldr.unicode.org/index/downloads
+cldr-common-45.0.zip
