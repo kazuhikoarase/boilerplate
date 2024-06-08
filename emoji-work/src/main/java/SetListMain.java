@@ -3,7 +3,6 @@ import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
@@ -16,14 +15,22 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.text.AttributedString;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
+import javax.imageio.stream.ImageOutputStream;
 
 public class SetListMain {
 
@@ -31,27 +38,30 @@ public class SetListMain {
     new SetListMain().start();
   }
 
-  protected final float marginTop = 80;
-  protected final float marginBottom = 40;
-  protected final float indexMarginLeft = 70;
-  protected final float marginLeft = 20;
-  protected final float marginRight = 20;
+  protected int unit = 80;
+  protected int numSections = 3;
+  protected int width = unit * 16;
+  protected int height = unit * 9 * numSections;
 
-  protected final float paraVGap = 10;
-  protected final float vGap = 2;
-  protected final float hGap = 6;
+  protected float marginTop = 80;
+  protected float marginBottom = 40;
+  protected float marginLeft = 40;
+  protected float marginRight = 40;
+  protected float indexMarginLeft = 110;
 
-  protected final int unit = 80;
-  protected final int numSections = 3;
-  protected final int width = unit * 16;
-  protected final int height = unit * 9 * numSections;
+  protected float paraVGap = 12;
+  protected float vGap = 4;
+  protected float hGap = 8;
 
-  protected final float titleFontSize = 24;
-  protected final float indexFontSize = 21;
-  protected final float bodyFontSize = 30;
+  protected float titleFontSize = 32;
+  protected float indexFontSize = 28;
+  protected float bodyFontSize = 36;
 
-  protected final String title = "＜アーティスト名＞ 2024/01/01 セットリスト";
+  protected Color textColor = new Color(0x000000);
 
+  protected Map<String,String> headers;
+  protected List<String> list;
+  
   protected BufferedImage image;
   protected Graphics2D g;
   protected Font titleFont;
@@ -71,6 +81,8 @@ public class SetListMain {
       in.close();
     }
 
+    loadSetList();
+
     final FontRenderContext frc = new FontRenderContext(null, true, true);
 
     titleFont = baseFont.deriveFont( (float)titleFontSize);
@@ -78,12 +90,9 @@ public class SetListMain {
     bodyFont = baseFont.deriveFont( (float)bodyFontSize);
 
     final List<List<TextLayout>> layoutList = new ArrayList<>();
-
-    for (String s : loadList() ) {
-
+    for (String s : list) {
       final AttributedString string = new AttributedString(s);
       string.addAttribute(TextAttribute.FONT, bodyFont);
-
       final List<TextLayout> paragraph = new ArrayList<>();
       final LineBreakMeasurer lbm =
           new LineBreakMeasurer(string.getIterator(), frc);
@@ -155,43 +164,73 @@ public class SetListMain {
     g.setPaint(new Color(0xffffff) );
     g.fill(new Rectangle2D.Float(0, 0, width, height) );
 
-    drawGuides(image, g, numSections);
+    if ("true".equals(headers.get("show-guides") ) ) {
 
-    g.setPaint(new Color(0x00ffff) );
-    g.draw(new Line2D.Float(0, marginTop, width, marginTop) );
-    g.draw(new Line2D.Float(0, height - marginBottom,
-        width, height - marginBottom) );
-    g.draw(new Line2D.Float(marginLeft, 0, marginLeft, height) );
-    g.draw(new Line2D.Float(width - marginRight, 0,
-        width - marginRight, height) );
-    g.draw(new Line2D.Float(indexMarginLeft, 0, indexMarginLeft, height) );
+      drawGuides();
 
-    g.setPaint(new Color(0x0000ff) );
+    }
+
+    g.setPaint(textColor);
     x = indexMarginLeft;
-    y = marginTop;
+    y = marginTop + paraVGap;
     imageIndex += 1;
 
+    final String title = headers.get("title");
+    if (title != null) {
+      drawLeftTitle(title);
+    }
+  }
+
+  protected void drawLeftTitle(final String text) throws Exception {
+    g.setFont(titleFont);
+    float x = marginLeft;
+    float y = marginTop - g.getFontMetrics().getDescent() - paraVGap;
+    g.drawString(text, x, y);
+  }
+
+  protected void drawRightTitle(final String text) throws Exception {
     g.setFont(titleFont);
     float x = width - marginRight -
-        (float)g.getFontMetrics().getStringBounds(title, null).getWidth();
+        (float)g.getFontMetrics().getStringBounds(text, null).getWidth();
     float y = marginTop - g.getFontMetrics().getDescent() - paraVGap;
-    g.drawString(title, x, y);
+    g.drawString(text, x, y);
   }
 
   protected void endImage() throws Exception {
+
     g.dispose();
 
     final File dir = new File("out");
     if (!dir.exists() ) {
       dir.mkdirs();
     }
-    ImageIO.write(image, "jpg", new File(dir, "test" + imageIndex + ".jpg") );
+
+    final ImageOutputStream out =
+        ImageIO.createImageOutputStream(new FileOutputStream(
+            new File(dir, "setlist_" + imageIndex + ".jpg") ) );
+
+    try {
+
+      final ImageWriteParam param = new JPEGImageWriteParam(null);
+      param.setProgressiveMode(JPEGImageWriteParam.MODE_DISABLED);
+      param.setCompressionMode(JPEGImageWriteParam.MODE_EXPLICIT);
+      param.setCompressionQuality(1);
+
+      final ImageWriter writer =
+          (ImageWriter)ImageIO.getImageWritersByFormatName("jpg").next();
+      try {
+        writer.setOutput(out);
+        writer.write(null, new IIOImage(image, null, null), param);
+      } finally {
+        writer.dispose();
+      }
+
+    } finally {
+      out.close();
+    }
   }
 
-  protected static void drawGuides(
-      final BufferedImage image,
-      final Graphics2D g,
-      final int numSections) throws Exception {
+  protected  void drawGuides() throws Exception {
 
     final float width = image.getWidth();
     final float height = image.getHeight();
@@ -199,6 +238,14 @@ public class SetListMain {
 
     g.setPaint(new Color(0x00ffff) );
     g.setStroke(new BasicStroke(lineWidth) );
+
+    g.draw(new Line2D.Float(0, marginTop, width, marginTop) );
+    g.draw(new Line2D.Float(0, height - marginBottom,
+        width, height - marginBottom) );
+    g.draw(new Line2D.Float(marginLeft, 0, marginLeft, height) );
+    g.draw(new Line2D.Float(width - marginRight, 0,
+        width - marginRight, height) );
+    g.draw(new Line2D.Float(indexMarginLeft, 0, indexMarginLeft, height) );
 
     //bounds
     g.draw(new Rectangle2D.Float(lineWidth / 2, lineWidth / 2,
@@ -218,9 +265,11 @@ public class SetListMain {
     }
   }
 
+  protected void loadSetList() throws Exception {
 
-  protected List<String> loadList() throws Exception {
-    final List<String> list = new ArrayList<>();
+    list = new ArrayList<>();
+    headers = new HashMap<>();
+
     final BufferedReader in = new BufferedReader(
         new InputStreamReader(
             getClass().getResourceAsStream("list.txt"), "UTF-8") );
@@ -229,27 +278,43 @@ public class SetListMain {
         String line;
 
         // skip header.
-        if (in.readLine() == null) {
-          throw new NullPointerException("no header");
+        final String header = in.readLine();
+        if (!header.startsWith("SLST ") ) {
+          throw new Exception("no header");
         }
 
         while ( (line = in.readLine() ) != null) {
           line = line.trim();
           if (line.length() == 0) {
-            continue;
-          } else if (line.startsWith("#") ) {
-            continue;
-          } else {
-            String[] items = line.split("\t");
-            if (items.length != 2) {
-              throw new Exception(line);
-            }
-            list.add(items[0] + " / " + items[1]);
+            break;
           }
+          int index = line.indexOf(':');
+          final String key = line.substring(0, index).trim().toLowerCase();
+          final String value = line.substring(index + 1).trim();
+          headers.put(key, value);
+        }
+
+        int lineCount = 0;
+        while ( (line = in.readLine() ) != null) {
+          lineCount += 1;
+          if (lineCount == 1) {
+            // skip header.
+            System.err.println("skip header:" + line);
+            continue;
+          }
+
+          line = line.trim();
+          if (line.length() == 0) {
+            continue;
+          }
+          final String[] items = line.split("\t");
+          if (items.length != 2) {
+            throw new Exception(line);
+          }
+          list.add(items[0] + " / " + items[1]);
         }
     } finally {
       in.close();
     }
-    return list;
   }
 }
