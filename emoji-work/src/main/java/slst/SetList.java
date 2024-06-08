@@ -63,7 +63,6 @@ public class SetList {
       lineCount += 1;
       if (lineCount == 1) {
         // skip header.
-        System.err.println("skip header:" + line);
         continue;
       }
 

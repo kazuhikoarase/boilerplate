@@ -34,35 +34,35 @@ public class Main {
     new Main().start();
   }
 
-  protected int unit = 80;
-  protected int numSections = 3;
-  protected int width = unit * 16;
-  protected int height = unit * 9 * numSections;
+  private int unit = 80;
+  private int numSections = 3;
+  private int width = unit * 16;
+  private int height = unit * 9 * numSections;
 
-  protected float marginTop = 80;
-  protected float marginBottom = 40;
-  protected float marginLeft = 40;
-  protected float marginRight = 40;
-  protected float indexMarginLeft = 110;
+  private float marginTop = 120;
+  private float marginBottom = 40;
+  private float marginLeft = 40;
+  private float marginRight = 40;
+  private float indexMarginLeft = 110;
 
-  protected float paraVGap = 12;
-  protected float vGap = 4;
-  protected float hGap = 8;
+  private float paraVGap = 12;
+  private float vGap = 4;
+  private float hGap = 8;
 
-  protected float titleFontSize = 32;
-  protected float indexFontSize = 28;
-  protected float bodyFontSize = 36;
+  private float titleFontSize = 32;
+  private float indexFontSize = 28;
+  private float bodyFontSize = 36;
 
-  protected Color textColor = new Color(0x000000);
+  private Color textColor = new Color(0x000000);
 
-  protected Font titleFont;
-  protected Font indexFont;
-  protected Font bodyFont;
+  private Font titleFont;
+  private Font indexFont;
+  private Font bodyFont;
 
-
-  protected BufferedImage image;
-  protected Graphics2D g;
-
+  private BufferedImage image;
+  private Graphics2D g;
+  private int imageCount;
+  
   protected void start() throws Exception {
 
     final SetList setList;
@@ -116,13 +116,33 @@ public class Main {
   protected void render(final SetList setList,
       final List<List<TextLayout>> layoutList) throws Exception {
 
+    imageCount = 0;
+
+    render(setList, layoutList, new PageRenderer() {
+      @Override
+      public void begin(final SetList setList) throws Exception {
+        imageCount += 1;
+      }
+      @Override
+      public void end() throws Exception {
+      }
+      @Override
+      public void render(final int textIndex,
+          final float x, final float y,
+          final TextLayout layout) throws Exception {
+      }
+    });
+
     final int[] setIndex = { 0 };
     final int[] imageIndex = { 0 };
 
     render(setList, layoutList, new PageRenderer() {
       @Override
       public void begin(final SetList setList) throws Exception {
-        beginImage(setList);
+        final String title = setList.getHeader("title");
+        final String page = imageCount > 1?
+            (imageIndex[0] + 1) + "/" + imageCount : null;
+        beginImage(setList, title, page);
         imageIndex[0] += 1;
       }
       @Override
@@ -190,7 +210,8 @@ public class Main {
     renderer.end();
   }
 
-  protected void beginImage(final SetList setList) throws Exception {
+  protected void beginImage(final SetList setList,
+      final String leftTitle, final String rightTitle) throws Exception {
 
     image = new BufferedImage(
         width, height, BufferedImage.TYPE_INT_RGB);
@@ -212,9 +233,11 @@ public class Main {
 
     g.setPaint(textColor);
 
-    final String title = setList.getHeader("title");
-    if (title != null) {
-      drawLeftTitle(title);
+    if (leftTitle != null) {
+      drawLeftTitle(leftTitle);
+    }
+    if (rightTitle != null) {
+      drawRightTitle(rightTitle);
     }
   }
 
