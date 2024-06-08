@@ -54,6 +54,9 @@ public class Main {
   private float bodyFontSize = 36;
 
   private Color textColor = new Color(0x000000);
+  private Color backgroundColor = new Color(0xffffff);
+  private Color titleBackgroundColor = new Color(0xffddee);
+  private Color guideColor = new Color(0x00ffff);
 
   private Font titleFont;
   private Font indexFont;
@@ -224,8 +227,10 @@ public class Main {
         RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
     g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER) );
-    g.setPaint(new Color(0xffffff) );
+    g.setPaint(backgroundColor);
     g.fill(new Rectangle2D.Float(0, 0, width, height) );
+    g.setPaint(titleBackgroundColor);
+    g.fill(new Rectangle2D.Float(0, 0, width, marginTop) );
 
     if ("true".equals(setList.getHeader("show-guides") ) ) {
       drawGuides();
@@ -296,7 +301,7 @@ public class Main {
     final float height = image.getHeight();
     final float lineWidth = 1;
 
-    g.setPaint(new Color(0x00ffff) );
+    g.setPaint(guideColor);
     g.setStroke(new BasicStroke(lineWidth) );
 
     g.draw(new Line2D.Float(0, marginTop, width, marginTop) );
