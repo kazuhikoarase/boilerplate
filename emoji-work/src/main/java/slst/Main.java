@@ -1,3 +1,4 @@
+package slst;
 
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
@@ -13,17 +14,12 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.text.AttributedString;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -32,10 +28,10 @@ import javax.imageio.ImageWriter;
 import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
 import javax.imageio.stream.ImageOutputStream;
 
-public class SetListMain {
+public class Main {
 
   public static void main(final String[] args) throws Exception {
-    new SetListMain().start();
+    new Main().start();
   }
 
   protected int unit = 80;
@@ -59,29 +55,38 @@ public class SetListMain {
 
   protected Color textColor = new Color(0x000000);
 
-  protected Map<String,String> headers;
-  protected List<String> list;
-  
-  protected BufferedImage image;
-  protected Graphics2D g;
   protected Font titleFont;
   protected Font indexFont;
   protected Font bodyFont;
-  protected float x;
-  protected float y;
-  protected int imageIndex;
+
+
+  protected BufferedImage image;
+  protected Graphics2D g;
 
   protected void start() throws Exception {
 
+    final SetList setList;
+    final InputStream in = getClass().getResourceAsStream("/list.txt");
+    try {
+      setList = SetList.load(in);
+    } finally {
+      in.close();
+    }
+
+    final List<List<TextLayout>> layoutList = parse(setList);
+    render(setList, layoutList);
+  }
+
+  protected List<List<TextLayout>> parse(
+      final SetList setList) throws Exception {
+
     final Font baseFont;
-    final InputStream in = getClass().getResourceAsStream("ipaexg.ttf");
+    final InputStream in = getClass().getResourceAsStream("/ipaexg.ttf");
     try {
       baseFont = Font.createFont(Font.TRUETYPE_FONT, in);
     } finally {
       in.close();
     }
-
-    loadSetList();
 
     final FontRenderContext frc = new FontRenderContext(null, true, true);
 
@@ -90,65 +95,102 @@ public class SetListMain {
     bodyFont = baseFont.deriveFont( (float)bodyFontSize);
 
     final List<List<TextLayout>> layoutList = new ArrayList<>();
-    for (String s : list) {
-      final AttributedString string = new AttributedString(s);
+    for (int i = 0; i < setList.getItemCount(); i += 1) {
+      final String item = setList.getItemAt(i);
+      final AttributedString string =
+          new AttributedString(item);
       string.addAttribute(TextAttribute.FONT, bodyFont);
       final List<TextLayout> paragraph = new ArrayList<>();
       final LineBreakMeasurer lbm =
           new LineBreakMeasurer(string.getIterator(), frc);
-      while (lbm.getPosition() < s.length() ) {
+      while (lbm.getPosition() < item.length() ) {
         final TextLayout layout =
             lbm.nextLayout(width - indexMarginLeft - marginRight);
         paragraph.add(layout);
       }
       layoutList.add(paragraph);
     }
+    return layoutList;
+  }
 
-    imageIndex = 0;
+  protected void render(final SetList setList,
+      final List<List<TextLayout>> layoutList) throws Exception {
 
-    int setIndex = 0;
+    final int[] setIndex = { 0 };
+    final int[] imageIndex = { 0 };
 
-    beginImage();
+    render(setList, layoutList, new PageRenderer() {
+      @Override
+      public void begin(final SetList setList) throws Exception {
+        beginImage(setList);
+        imageIndex[0] += 1;
+      }
+      @Override
+      public void end() throws Exception {
+        endImage("setlist_" + imageIndex[0] + ".jpg");
+      }
+      @Override
+      public void render(final int textIndex,
+          final float x, final float y,
+          final TextLayout layout) throws Exception {
+        if (textIndex == 0) {
+          setIndex[0] += 1;
+          final String index = "" + setIndex[0];
+          g.setFont(indexFont);
+          final Rectangle2D bounds =
+              g.getFontMetrics().getStringBounds(index, null);
+          float ix = indexMarginLeft - hGap - (float)bounds.getWidth();
+          float iy = y;
+          g.drawString(index, ix, iy);
+        }
+        g.fill(layout.getOutline( new AffineTransform(1, 0, 0, 1, x, y) ) );
+      }
+    });
+  }
+
+  protected void render(final SetList setList,
+      final List<List<TextLayout>> layoutList,
+      final PageRenderer renderer) throws Exception {
+
+    float x;
+    float y;
+
+    x = indexMarginLeft;
+    y = marginTop + paraVGap;
+    renderer.begin(setList);
 
     for (int i = 0; i < layoutList.size(); i += 1) {
       final List<TextLayout> paragraph = layoutList.get(i);
-      for (int j = 0; j < paragraph.size(); j += 1) {
-        final TextLayout layout = paragraph.get(j);
+      for (int p = 0; p < paragraph.size(); p += 1) {
+        final TextLayout layout = paragraph.get(p);
 
         if (y + layout.getAscent() + layout.getDescent() >
             height - marginBottom) {
-          endImage();
-          beginImage();
-        }
 
-        if (j == 0) {
-          setIndex += 1;
-          final String index = "" + setIndex;
-          g.setFont(indexFont);
-          float ix = indexMarginLeft - hGap -
-              (float)g.getFontMetrics().getStringBounds(index, null).getWidth();
-          float iy = y + layout.getAscent() /*- igap*/;
-          g.drawString(index, ix, iy);
+          renderer.end();
+
+          x = indexMarginLeft;
+          y = marginTop + paraVGap;
+          renderer.begin(setList);
         }
 
         y += layout.getAscent();
-        g.fill(layout.getOutline( new AffineTransform(1, 0, 0, 1, x, y) ) );
+        renderer.render(p, x, y, layout);
         y += layout.getDescent();
 
-        if (j == paragraph.size() - 1) {
+        if (p == paragraph.size() - 1) {
           // last
           y += paraVGap;
         } else {
           y += vGap;
         }
       }
-
     }
 
-    endImage();
+    renderer.end();
   }
 
-  protected void beginImage() throws Exception {
+  protected void beginImage(final SetList setList) throws Exception {
 
     image = new BufferedImage(
         width, height, BufferedImage.TYPE_INT_RGB);
@@ -164,18 +206,13 @@ public class SetListMain {
     g.setPaint(new Color(0xffffff) );
     g.fill(new Rectangle2D.Float(0, 0, width, height) );
 
-    if ("true".equals(headers.get("show-guides") ) ) {
-
+    if ("true".equals(setList.getHeader("show-guides") ) ) {
       drawGuides();
-
     }
 
     g.setPaint(textColor);
-    x = indexMarginLeft;
-    y = marginTop + paraVGap;
-    imageIndex += 1;
 
-    final String title = headers.get("title");
+    final String title = setList.getHeader("title");
     if (title != null) {
       drawLeftTitle(title);
     }
@@ -196,7 +233,7 @@ public class SetListMain {
     g.drawString(text, x, y);
   }
 
-  protected void endImage() throws Exception {
+  protected void endImage(final String filename) throws Exception {
 
     g.dispose();
 
@@ -207,7 +244,7 @@ public class SetListMain {
 
     final ImageOutputStream out =
         ImageIO.createImageOutputStream(new FileOutputStream(
-            new File(dir, "setlist_" + imageIndex + ".jpg") ) );
+            new File(dir, filename) ) );
 
     try {
 
@@ -230,7 +267,7 @@ public class SetListMain {
     }
   }
 
-  protected  void drawGuides() throws Exception {
+  protected void drawGuides() throws Exception {
 
     final float width = image.getWidth();
     final float height = image.getHeight();
@@ -252,69 +289,16 @@ public class SetListMain {
         width - lineWidth, height - lineWidth) );
 
     for (int i = 0; i < numSections; i += 1) {
-        // cross
+      // cross
+      g.draw(new Line2D.Float(0, height / numSections * i,
+          width, height / numSections * (i + 1) ) );
+      g.draw(new Line2D.Float(width, height / numSections * i,
+          0, height / numSections * (i + 1) ) );
+      // hr
+      if (i > 0) {
         g.draw(new Line2D.Float(0, height / numSections * i,
-            width, height / numSections * (i + 1) ) );
-        g.draw(new Line2D.Float(width, height / numSections * i,
-            0, height / numSections * (i + 1) ) );
-        // hr
-        if (i > 0) {
-          g.draw(new Line2D.Float(0, height / numSections * i,
-              width, height / numSections * i) );
-        }
-    }
-  }
-
-  protected void loadSetList() throws Exception {
-
-    list = new ArrayList<>();
-    headers = new HashMap<>();
-
-    final BufferedReader in = new BufferedReader(
-        new InputStreamReader(
-            getClass().getResourceAsStream("list.txt"), "UTF-8") );
-    try {
-
-        String line;
-
-        // skip header.
-        final String header = in.readLine();
-        if (!header.startsWith("SLST ") ) {
-          throw new Exception("no header");
-        }
-
-        while ( (line = in.readLine() ) != null) {
-          line = line.trim();
-          if (line.length() == 0) {
-            break;
-          }
-          int index = line.indexOf(':');
-          final String key = line.substring(0, index).trim().toLowerCase();
-          final String value = line.substring(index + 1).trim();
-          headers.put(key, value);
-        }
-
-        int lineCount = 0;
-        while ( (line = in.readLine() ) != null) {
-          lineCount += 1;
-          if (lineCount == 1) {
-            // skip header.
-            System.err.println("skip header:" + line);
-            continue;
-          }
-
-          line = line.trim();
-          if (line.length() == 0) {
-            continue;
-          }
-          final String[] items = line.split("\t");
-          if (items.length != 2) {
-            throw new Exception(line);
-          }
-          list.add(items[0] + " / " + items[1]);
-        }
-    } finally {
-      in.close();
+            width, height / numSections * i) );
+      }
     }
   }
 }
