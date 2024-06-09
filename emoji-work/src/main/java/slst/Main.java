@@ -182,7 +182,7 @@ public class Main {
     float y;
 
     x = indexMarginLeft;
-    y = marginTop + paraVGap;
+    y = marginTop + titleVGap;
     renderer.begin(setList);
 
     for (int i = 0; i < layoutList.size(); i += 1) {
@@ -196,7 +196,7 @@ public class Main {
           renderer.end();
 
           x = indexMarginLeft;
-          y = marginTop + paraVGap;
+          y = marginTop + titleVGap;
           renderer.begin(setList);
         }
 
