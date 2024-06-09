@@ -45,9 +45,10 @@ public class Main {
   private float marginRight = 40;
   private float indexMarginLeft = 110;
 
-  private float paraVGap = 12;
-  private float vGap = 4;
   private float hGap = 8;
+  private float vGap = 4;
+  private float titleVGap = 16;
+  private float paraVGap = 12;
 
   private float titleFontSize = 32;
   private float indexFontSize = 28;
@@ -55,7 +56,6 @@ public class Main {
 
   private Color textColor = new Color(0x000000);
   private Color backgroundColor = new Color(0xffffff);
-  private Color titleBackgroundColor = new Color(0xffddee);
   private Color guideColor = new Color(0x00ffff);
 
   private Font titleFont;
@@ -143,9 +143,12 @@ public class Main {
       @Override
       public void begin(final SetList setList) throws Exception {
         final String title = setList.getHeader("title");
+        final String bgImagePath = setList.getHeader("background-image");
         final String page = imageCount > 1?
             (imageIndex[0] + 1) + "/" + imageCount : null;
-        beginImage(setList, title, page);
+        beginImage(setList, title, page,
+            bgImagePath != null?
+                String.format(bgImagePath, imageIndex[0] + 1) : null);
         imageIndex[0] += 1;
       }
       @Override
@@ -214,7 +217,8 @@ public class Main {
   }
 
   protected void beginImage(final SetList setList,
-      final String leftTitle, final String rightTitle) throws Exception {
+      final String leftTitle, final String rightTitle,
+      final String bgImagePath) throws Exception {
 
     image = new BufferedImage(
         width, height, BufferedImage.TYPE_INT_RGB);
@@ -229,8 +233,17 @@ public class Main {
     g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER) );
     g.setPaint(backgroundColor);
     g.fill(new Rectangle2D.Float(0, 0, width, height) );
-    g.setPaint(titleBackgroundColor);
-    g.fill(new Rectangle2D.Float(0, 0, width, marginTop) );
+
+    if (bgImagePath != null) {
+      final BufferedImage bgImage;
+      final InputStream in = getClass().getResourceAsStream(bgImagePath);
+      try {
+        bgImage = ImageIO.read(in);
+      } finally {
+        in.close();
+      }
+      g.drawImage(bgImage, 0,  0,  null);
+    }
 
     if ("true".equals(setList.getHeader("show-guides") ) ) {
       drawGuides();
@@ -249,7 +262,7 @@ public class Main {
   protected void drawLeftTitle(final String text) throws Exception {
     g.setFont(titleFont);
     float x = marginLeft;
-    float y = marginTop - g.getFontMetrics().getDescent() - paraVGap;
+    float y = marginTop - g.getFontMetrics().getDescent() - titleVGap;
     g.drawString(text, x, y);
   }
 
@@ -257,7 +270,7 @@ public class Main {
     g.setFont(titleFont);
     float x = width - marginRight -
         (float)g.getFontMetrics().getStringBounds(text, null).getWidth();
-    float y = marginTop - g.getFontMetrics().getDescent() - paraVGap;
+    float y = marginTop - g.getFontMetrics().getDescent() - titleVGap;
     g.drawString(text, x, y);
   }
 
