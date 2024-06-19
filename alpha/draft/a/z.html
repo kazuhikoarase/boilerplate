@@ -2,11 +2,17 @@
 <html>
 <head>
   <script type="module" src="z.js"></script>
+  <style>
+INPUT[type=range] {
+width: 300px;
+}
+  </style>
 </head>
 <body>
-<button onclick="download()"> download </button>
-<br/>
-<div id="t1"></div>
-<div id="t2"></div>
+<label>r1: </label><input type="range" id="r1" min="50" max="400" value="350" step="1" /><br/>
+<label>r2: </label><input type="range" id="r2" min="50" max="400" value="235" step="1" /><br/>
+<label>r3: </label><input type="range" id="r3" min="50" max="400" value="200" step="1" /><br/>
+<label>coff: </label><input type="range" id="coff" min="0" max="360" value="0" step="1" /><br/>
+<button id="download"> download </button><br/>
 </body>
 </html>
