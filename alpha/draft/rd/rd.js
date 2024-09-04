@@ -10,16 +10,17 @@ window.addEventListener('load', function() {
     r : 1,
     er : [0, 0, 0], // eye-right
     el : [0, 0, 0], // eye-left
-    debug : true
+    debug : false
   };
   params.er = [50, 0, params.d]; // eye-right
   params.el = [-50, 0, params.d]; // eye-left
 
+  params.debug = true;
 //  var debug = false;
 
   var f = function(x, y) {
-//    return 200;
-    return (x * x + y * y) < 400? 100 : 150;
+//    return 120;
+    return (x * x + y * y) < 400? 120 : 160;
   };
 
   var ctx = document.createElement('canvas').getContext('2d');
@@ -50,6 +51,7 @@ window.addEventListener('load', function() {
     ctx.moveTo(0, -params.height / 2);
     ctx.lineTo(0, params.height / 2);
     ctx.stroke();
+    ctx.strokeRect(-params.width / 2, -params.height / 2, params.width, params.height);
 
     ctx.strokeStyle = '#00f';
     ctx.beginPath();
@@ -70,6 +72,7 @@ window.addEventListener('load', function() {
     ctx2.moveTo(0, -params.height / 2);
     ctx2.lineTo(0, params.height / 2);
     ctx2.stroke();
+    ctx2.strokeRect(-params.width / 2, -params.height / 2, params.width, params.height);
 
     ctx2.strokeStyle = '#00f';
     ctx2.beginPath();
@@ -83,7 +86,7 @@ window.addEventListener('load', function() {
     for (var x = -params.width / 2; x < params.width / 2; x += 2) {
       ctx2.beginPath();
       var z = f(x, 0);
-      ctx2.arc(x, z, 1, 0, Math.PI * 2);
+      ctx2.arc(x, z, 0.5, 0, Math.PI * 2);
       ctx2.stroke();
     }
   }
@@ -103,16 +106,48 @@ window.addEventListener('load', function() {
       var cm = [(c0[0] + c1[0]) / 2, (c0[1] + c1[1]) / 2, (c0[2] + c1[2]) / 2];
       var zm = f(cm[0], cm[1]);
       var ds = len2(c0, c1);
+
+      if (params.debug) {
+//        console.log(i, c0, c1, cm, ds, zm);
+
+        ctx.strokeStyle = '#f0f';
+        ctx.beginPath();
+        ctx.arc(c0[0], c0[1], 2, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx2.strokeStyle = '#f0f';
+        ctx2.beginPath();
+        ctx2.arc(c0[0], c0[2], 2, 0, Math.PI * 2);
+        ctx2.stroke();
+
+        ctx.strokeStyle = '#0f0';
+        ctx.beginPath();
+        ctx.arc(c1[0], c1[1], 2, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx2.strokeStyle = '#0f0';
+        ctx2.beginPath();
+        ctx2.arc(c1[0], c1[2], 2, 0, Math.PI * 2);
+        ctx2.stroke();
+
+        ctx.strokeStyle = '#0ff';
+        ctx.beginPath();
+        ctx.arc(cm[0], cm[1], 5, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx2.strokeStyle = '#0ff';
+        ctx2.beginPath();
+        ctx2.arc(cm[0], cm[2], 5, 0, Math.PI * 2);
+        ctx2.stroke();
+      }
+
       i += 1;
       if (ds < 1) {
         var x =c;
         c = c0;
         break;
       }
-      if (zm >= cm[2]) {
-        c1 = cm;
-      } else {
+      if ( (cm[2] - zm) * (c0[2] - zm) > 0) {
         c0 = cm;
+      } else {
+        c1 = cm;
       }
     }
 
@@ -158,21 +193,17 @@ window.addEventListener('load', function() {
 
   var rtl = function(p) {
     var c;
-    c = rt1(p, params.el);
-    p = rt2(c, params.er);
-    c = rt1(p, params.el);
-    p = rt2(c, params.er);
-    c = rt1(p, params.el);
-    p = rt2(c, params.er);
+    for (var i = 0; i < 3; i += 1) {
+      c = rt1(p, params.el);
+      p = rt2(c, params.er);
+    }
   };
   var rtr = function(p) {
     var c;
-    c = rt1(p, params.er);
-    p = rt2(c, params.el);
-    c = rt1(p, params.er);
-    p = rt2(c, params.el);
-    c = rt1(p, params.er);
-    p = rt2(c, params.el);
+    for (var i = 0; i < 3; i += 1) {
+      c = rt1(p, params.er);
+      p = rt2(c, params.el);
+    }
   };
   var rand = function(seed) {
     var a = 4.34567 + seed;
@@ -186,24 +217,25 @@ window.addEventListener('load', function() {
   }(4);
 
   var p;
-
+/*
   p = [-20, -15, 0];
   rtl(p);
   rtr(p);
+
   p = [0, -10, 0];
   rtl(p);
   rtr(p);
   p = [-25, 10, 0];
   rtl(p);
   rtr(p);
+*/
 
-/*
   for (var i = 0; i < 1000; i += 1) {
-    p = [width * rand() - width / 2, height * rand() - height / 2, 0];
+    p = [params.width * rand() - params.width / 2, params.height * rand() - params.height / 2, 0];
     rtl(p);
     rtr(p);
   }
-*/
+
   /*
   var rd = function() {
     let last = -1 
