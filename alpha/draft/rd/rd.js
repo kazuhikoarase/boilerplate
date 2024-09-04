@@ -8,7 +8,7 @@ window.addEventListener('load', function() {
     d : -1600, // depth
     m : 800, // max depth
     r : 0.5,
-    e : 250,
+    e : 200,
     er : [0, 0, 0], // eye-right
     el : [0, 0, 0], // eye-left
     debug : false
@@ -22,13 +22,16 @@ window.addEventListener('load', function() {
 
   var f = function(x, y) {
 //    return 160;
-    return (x * x + y * y) < 100*100? 450 : 500;
+    var r = Math.sqrt(x * x + y * y);
+    return  100 <= r && r <= 200? 500 : 600;
   };
 
   var ctx = document.createElement('canvas').getContext('2d');
   document.body.appendChild(ctx.canvas);
   ctx.canvas.width = params.width;
   ctx.canvas.height = params.height;
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, params.width, params.height);
   ctx.translate(params.width / 2, params.height / 2);
   ctx.canvas.style.position = 'absolute';
   ctx.canvas.style.left = 400 + 'px';
@@ -172,7 +175,7 @@ window.addEventListener('load', function() {
   rtr(p);
 */
 
-  for (var i = 0; i < 2000; i += 1) {
+  for (var i = 0; i < 4000; i += 1) {
     p = [params.width * rand() - params.width / 2, params.height * rand() - params.height / 2, 0];
     rtl(p);
     rtr(p);
