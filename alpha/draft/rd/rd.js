@@ -2,49 +2,90 @@
 'use strict'
 window.addEventListener('load', function() {
 
-  var ctx = document.createElement('canvas').getContext('2d');
-  document.body.appendChild(ctx.canvas);
-  var width = 400;
-  var height = 400;
-  var d = -200; // depth
-  var m = 200; // max depth
-  var r = 1;
-  var er = [50, 0, d]; // eye-right
-  var el = [-50, 0, d]; // eye-left
-//  var debug = true;
-  var debug = false;
+  var params = {
+    width : 400,
+    height : 400,
+    d : -200, // depth
+    m : 200, // max depth
+    r : 1,
+    er : [0, 0, 0], // eye-right
+    el : [0, 0, 0], // eye-left
+    debug : true
+  };
+  params.er = [50, 0, params.d]; // eye-right
+  params.el = [-50, 0, params.d]; // eye-left
+
+//  var debug = false;
 
   var f = function(x, y) {
 //    return 200;
-    return (x * x + y * y) < 400? 100 : 200;
+    return (x * x + y * y) < 400? 100 : 150;
   };
 
+  var ctx = document.createElement('canvas').getContext('2d');
+  document.body.appendChild(ctx.canvas);
+  ctx.canvas.width = params.width;
+  ctx.canvas.height = params.height;
+  ctx.translate(params.width / 2, params.height / 2);
   ctx.canvas.style.position = 'absolute';
-  ctx.canvas.style.left = '400px';
-  ctx.canvas.style.top = '100px';
+  ctx.canvas.style.left = 400 + 'px';
+  ctx.canvas.style.top = 100 + 'px';
 
-  ctx.canvas.width = width;
-  ctx.canvas.height = height;
-  ctx.translate(width / 2, height / 2);
+  var ctx2 = document.createElement('canvas').getContext('2d');
+  document.body.appendChild(ctx2.canvas);
+  ctx2.canvas.width = params.width;
+  ctx2.canvas.height = params.height;
+  ctx2.translate(params.width / 2, params.height / 2);
+  ctx2.canvas.style.position = 'absolute';
+  ctx2.canvas.style.left = (400 + params.width) + 'px';
+  ctx2.canvas.style.top = 100 +'px';
 
-  if (debug) {
+  if (params.debug) {
     ctx.strokeStyle = '#ccc';
     ctx.beginPath();
-    ctx.moveTo(-width / 2, 0);
-    ctx.lineTo(width / 2, 0);
+    ctx.moveTo(-params.width / 2, 0);
+    ctx.lineTo(params.width / 2, 0);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(0, -height / 2);
-    ctx.lineTo(0, height / 2);
+    ctx.moveTo(0, -params.height / 2);
+    ctx.lineTo(0, params.height / 2);
     ctx.stroke();
 
     ctx.strokeStyle = '#00f';
     ctx.beginPath();
-    ctx.arc(el[0], el[1], 5, 0, Math.PI * 2);
+    ctx.arc(params.el[0], params.el[1], 5, 0, Math.PI * 2);
     ctx.stroke();
     ctx.beginPath();
-    ctx.arc(er[0], er[1], 5, 0, Math.PI * 2);
+    ctx.arc(params.er[0], params.er[1], 5, 0, Math.PI * 2);
     ctx.stroke();
+  }
+
+  if (params.debug) {
+    ctx2.strokeStyle = '#ccc';
+    ctx2.beginPath();
+    ctx2.moveTo(-params.width / 2, 0);
+    ctx2.lineTo(params.width / 2, 0);
+    ctx2.stroke();
+    ctx2.beginPath();
+    ctx2.moveTo(0, -params.height / 2);
+    ctx2.lineTo(0, params.height / 2);
+    ctx2.stroke();
+
+    ctx2.strokeStyle = '#00f';
+    ctx2.beginPath();
+    ctx2.arc(params.el[0], params.el[2], 5, 0, Math.PI * 2);
+    ctx2.stroke();
+    ctx2.beginPath();
+    ctx2.arc(params.er[0], params.er[2], 5, 0, Math.PI * 2);
+    ctx2.stroke();
+
+    ctx2.strokeStyle = '#f00';
+    for (var x = -params.width / 2; x < params.width / 2; x += 2) {
+      ctx2.beginPath();
+      var z = f(x, 0);
+      ctx2.arc(x, z, 1, 0, Math.PI * 2);
+      ctx2.stroke();
+    }
   }
 
   var len2 = function(p0, p1) {
@@ -53,7 +94,7 @@ window.addEventListener('load', function() {
   };
   var rt1 = function(p, e) {
     var pe = [p[0] - e[0], p[1] - e[1], p[2] - e[2]];
-    var ratio = -(m - e[2]) / e[2];
+    var ratio = -(params.m - e[2]) / e[2];
     var c = [e[0] + pe[0] * ratio, e[1] + pe[1] * ratio, e[2] + pe[2] * ratio];
     var c0 = c;
     var c1 = p;
@@ -77,13 +118,25 @@ window.addEventListener('load', function() {
 
     ctx.strokeStyle = '#000';
     ctx.beginPath();
-    ctx.arc(p[0], p[1], r, 0, Math.PI * 2);
+    ctx.arc(p[0], p[1], params.r, 0, Math.PI * 2);
     ctx.stroke();
-    if (debug) {
+
+    ctx2.strokeStyle = '#000';
+    ctx2.beginPath();
+    ctx2.arc(p[0], p[2], params.r, 0, Math.PI * 2);
+    ctx2.stroke();
+
+    if (params.debug) {
       ctx.strokeStyle = '#f90';
       ctx.beginPath();
       ctx.arc(c[0], c[1], 5, 0, Math.PI * 2);
       ctx.stroke();
+    }
+    if (params.debug) {
+      ctx2.strokeStyle = '#f90';
+      ctx2.beginPath();
+      ctx2.arc(c[0], c[2], 5, 0, Math.PI * 2);
+      ctx2.stroke();
     }
     return c;
   };
@@ -94,28 +147,32 @@ window.addEventListener('load', function() {
     var p = [c[0] + ce[0] * ratio, c[1] + ce[1] * ratio, c[2] + ce[2] * ratio];
     ctx.strokeStyle = '#000';
     ctx.beginPath();
-    ctx.arc(p[0], p[1], r, 0, Math.PI * 2);
+    ctx.arc(p[0], p[1], params.r, 0, Math.PI * 2);
     ctx.stroke();
+    ctx2.strokeStyle = '#000';
+    ctx2.beginPath();
+    ctx2.arc(p[0], p[2], params.r, 0, Math.PI * 2);
+    ctx2.stroke();
     return p;
   };
 
   var rtl = function(p) {
     var c;
-    c = rt1(p, el);
-    p = rt2(c, er);
-    c = rt1(p, el);
-    p = rt2(c, er);
-    c = rt1(p, el);
-    p = rt2(c, er);
+    c = rt1(p, params.el);
+    p = rt2(c, params.er);
+    c = rt1(p, params.el);
+    p = rt2(c, params.er);
+    c = rt1(p, params.el);
+    p = rt2(c, params.er);
   };
   var rtr = function(p) {
     var c;
-    c = rt1(p, er);
-    p = rt2(c, el);
-    c = rt1(p, er);
-    p = rt2(c, el);
-    c = rt1(p, er);
-    p = rt2(c, el);
+    c = rt1(p, params.er);
+    p = rt2(c, params.el);
+    c = rt1(p, params.er);
+    p = rt2(c, params.el);
+    c = rt1(p, params.er);
+    p = rt2(c, params.el);
   };
   var rand = function(seed) {
     var a = 4.34567 + seed;
@@ -129,7 +186,7 @@ window.addEventListener('load', function() {
   }(4);
 
   var p;
-  /*
+
   p = [-20, -15, 0];
   rtl(p);
   rtr(p);
@@ -139,14 +196,14 @@ window.addEventListener('load', function() {
   p = [-25, 10, 0];
   rtl(p);
   rtr(p);
-  */
 
+/*
   for (var i = 0; i < 1000; i += 1) {
     p = [width * rand() - width / 2, height * rand() - height / 2, 0];
     rtl(p);
     rtr(p);
   }
-
+*/
   /*
   var rd = function() {
     let last = -1 
