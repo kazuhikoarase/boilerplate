@@ -6,14 +6,14 @@ window.addEventListener('load', function() {
     width : 800,
     height : 450,
     d : -1600, // depth
-    m : 800, // max depth
+    m : 1600, // max depth
     r : 0.5,
     e : 200,
     er : [0, 0, 0], // eye-right
     el : [0, 0, 0], // eye-left
     debug : false
   };
-  var ew = 50;
+
   params.er = [params.e, 0, params.d]; // eye-right
   params.el = [-params.e, 0, params.d]; // eye-left
 
@@ -23,7 +23,22 @@ window.addEventListener('load', function() {
   var f = function(x, y) {
 //    return 160;
     var r = Math.sqrt(x * x + y * y);
-    return  100 <= r && r <= 200? 500 : 600;
+    var d1 = 600;
+    var d2 = 700;
+    if (r < 50) {
+      return d1;
+    } else if (r < 100) {
+      return d2;
+    } else if (r < 150) {
+      return d1;
+    } else if (r < 200) {
+      return d2;
+    } else if (r < 250) {
+      return d1;
+    } else {
+      return d2;
+    }
+//    return  100 <= r && r <= 200? 500 : 600;
   };
 
   var ctx = document.createElement('canvas').getContext('2d');
@@ -36,7 +51,8 @@ window.addEventListener('load', function() {
   ctx.canvas.style.position = 'absolute';
   ctx.canvas.style.left = 400 + 'px';
   ctx.canvas.style.top = 100 + 'px';
-
+  ctx.canvas.style.imageRendering = 'pixelated';
+  
   if (params.debug) {
     ctx.strokeStyle = '#ccc';
     ctx.beginPath();
@@ -61,6 +77,13 @@ window.addEventListener('load', function() {
   var len2 = function(p0, p1) {
     var pm = [p0[0] - p1[0], p0[1] - p1[1], p0[2] - p1[2]];
     return pm[0] * pm[0] + pm[1] * pm[1] + pm[2] * pm[2];
+  };
+  var drawDot = function(ctx, x, y) {
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+//    ctx.arc(x, y, params.r, 0, Math.PI * 2);
+    ctx.rect(x, y, 1, 1);
+    ctx.fill();
   };
   var rt1 = function(p, e) {
     var pe = [p[0] - e[0], p[1] - e[1], p[2] - e[2]];
@@ -106,10 +129,7 @@ window.addEventListener('load', function() {
       }
     }
 
-    ctx.strokeStyle = '#000';
-    ctx.beginPath();
-    ctx.arc(p[0], p[1], params.r, 0, Math.PI * 2);
-    ctx.stroke();
+    drawDot(ctx, p[0], p[1]);
 
     if (params.debug) {
       ctx.strokeStyle = '#f90';
@@ -125,10 +145,7 @@ window.addEventListener('load', function() {
     var ce = [c[0] - e[0], c[1] - e[1], c[2] - e[2]];
     var ratio = -c[2] / (c[2] - e[2]);
     var p = [c[0] + ce[0] * ratio, c[1] + ce[1] * ratio, c[2] + ce[2] * ratio];
-    ctx.strokeStyle = '#000';
-    ctx.beginPath();
-    ctx.arc(p[0], p[1], params.r, 0, Math.PI * 2);
-    ctx.stroke();
+    drawDot(ctx, p[0], p[1]);
     return p;
   };
 
@@ -181,22 +198,4 @@ window.addEventListener('load', function() {
     rtr(p);
   }
 
-  /*
-  var rd = function() {
-    let last = -1 
-    var rand = function(a, b) {
-      const rnd = a+(b-a+1)*crypto.getRandomValues(new Uint32Array(1))[0]/2**32|0
-      if (rnd === last) {
-        return rand(a, b)
-      } else {
-        last = rnd
-        return rnd
-      }
-    };
-    return rand;
-  }();
-  console.log(rd(1,1<<15) );
-  console.log(rd(1,1<<15) );
-  console.log(rd(1,1<<15) );
-  */
 });
