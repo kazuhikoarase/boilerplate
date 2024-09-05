@@ -49,7 +49,7 @@ window.addEventListener('load', function() {
   ctx.fillRect(0, 0, params.width, params.height);
   ctx.translate(params.width / 2, params.height / 2);
   ctx.canvas.style.position = 'absolute';
-  ctx.canvas.style.left = 400 + 'px';
+  ctx.canvas.style.left = 100 + 'px';
   ctx.canvas.style.top = 100 + 'px';
   ctx.canvas.style.imageRendering = 'pixelated';
   
@@ -82,7 +82,7 @@ window.addEventListener('load', function() {
     ctx.fillStyle = '#000';
     ctx.beginPath();
 //    ctx.arc(x, y, params.r, 0, Math.PI * 2);
-    ctx.rect(x, y, 1, 1);
+    ctx.rect(x - params.r, y - params.r, params.r * 2, params.r * 2);
     ctx.fill();
   };
   var rt1 = function(p, e) {
