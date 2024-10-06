@@ -1,0 +1,201 @@
+<!doctype html>
+<html>
+<head>
+<script>
+window.addEventListener('load', function() {
+
+  var days = 'SUN,MON,TUE,WED,THU,FRI,SAT'.split(/[\s,]+/g);
+
+  var svg = document.querySelector('svg');
+
+  var crtSvg = function(tagName) {
+    return document.createElementNS(svg.namespaceURI, tagName);
+  };
+  var pathBuilder = function() {
+    var d = '';
+    return {
+      moveTo: function(x, y) {
+        d = d + 'M' + x + ' ' + y;
+        return this;
+      },
+      lineTo: function(x, y) {
+        d = d + 'L' + x + ' ' + y;
+        return this;
+      },
+      build: function(x, y) {
+        return d;
+      }
+    };
+  }
+  var crtCal = function(opts) {
+    var g = crtSvg('g');
+    svg.appendChild(g);
+    g.setAttribute('transform', 'translate(' + opts.x + ' ' + opts.y + ')')
+    
+    var w = function(c) {
+      return opts.width / 7;
+    };
+    var h = function(r) {
+      if (r == 0) {
+        return opts.height / 7 / 2;
+      }
+      return opts.height / 7;
+    };
+    var pb = pathBuilder();
+    !function() {
+      var ch = 0;
+      for (var r = 0; r < 7; r += 1) {
+        ch += h(r);
+      }
+      var cw = 0;
+      for (var c = 0; c < 7; c += 1) {
+        cw += w(c);
+      }
+      var y = 0;
+      for (var r = 0; r <= 7; r += 1) {
+        pb.moveTo(0, y);
+        pb.lineTo(cw, y);
+        y += h(r);
+      }
+      var x = 0;
+      for (var c = 0; c <= 7; c += 1) {
+        pb.moveTo(x, 0);
+        pb.lineTo(x, ch);
+        x += w(c);
+      }
+    }();
+
+    var path = crtSvg('path');
+    g.appendChild(path);
+    path.setAttribute('stroke-width', '0.1');
+    path.setAttribute('stroke-linecap', 'square');
+    path.setAttribute('stroke', '#000000');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('d', pb.build() );
+    var baseDate = new Date(opts.year, opts.month - 1, 1);
+    var i = 0;
+    var fontSize = 3;
+    var gap = 0.2;
+
+    !function() {
+      var text = crtSvg('text');
+      text.textContent = opts.year + '/' + opts.month;
+      g.appendChild(text);
+      text.setAttribute('stroke', 'none');
+      text.setAttribute('fill', '#000000');
+      text.setAttribute('font-size', '' + fontSize * 1.25);
+      var bBox = text.getBBox();
+      var tx = bBox.x / 2 + (opts.width - bBox.width) / 2;
+      var ty = -1.5;
+      text.setAttribute('x', '' + tx);
+      text.setAttribute('y', '' + ty);
+    }();
+
+    var drawLabel = function(x, y, i, r, c) {
+      var text = crtSvg('text');
+      text.textContent = days[c];
+      g.appendChild(text);
+      text.setAttribute('stroke', 'none');
+      text.setAttribute('fill', '#000000');
+      text.setAttribute('font-size', '' + fontSize);
+      var bBox = text.getBBox();
+     console.log(h(r), bBox.y, bBox.height);
+      var tx = x - bBox.x / 2 + (w(c) - bBox.width) / 2;
+      var ty = y + h(r) - 1.5;// / 2 + (h(r) - bBox.height) / 2;
+//      var ty = y + bBox.y + h(r) + 1.5;//(h(r) - bBox.height) / 2;// +*/ bBox.height;
+      text.setAttribute('x', '' + tx);
+      text.setAttribute('y', '' + ty);
+    };
+    var drawDate = function(x, y, i, r, c) {
+      var date = new Date(opts.year, opts.month - 1, i - 7 - baseDate.getDay() + 1);
+      var thisMonth = date.getFullYear() == opts.year && opts.month == date.getMonth() + 1; 
+      var text = crtSvg('text');
+      text.setAttribute('stroke', 'none');
+      text.setAttribute('fill', thisMonth? '#000000' : '#cccccc');
+      text.textContent = '' + date.getDate();
+      g.appendChild(text);
+      text.setAttribute('font-size', '' + fontSize);
+      text.setAttribute('x', '' + (x + gap) );
+      text.setAttribute('y', '' + (y + gap + fontSize) );
+    };
+    !function() {
+      var y = 0;
+      for (var r = 0; r < 7; r += 1) {
+        var x = 0;
+        for (var c = 0; c < 7; c += 1) {
+          if (i < 7) {
+            drawLabel(x, y, i, r, c);
+          } else {
+            drawDate(x, y, i, r, c);
+          }
+          i += 1;
+
+          x += w(c);
+        }
+        y += h(r);
+      }
+    }();
+
+  };
+
+  !function() {
+    var year = 2024;
+    var month = 10;
+    var date = new Date(year, month - 1, 1);
+    var y = 0;
+    for (var r = 0; r < 4; r += 1) {
+      var x = 0;
+      for (var c = 0; c < 3; c += 1) {
+        crtCal({ x: 10 + x,  y: 15 + y, width: 60, height: 68,
+          year: date.getFullYear(), month: date.getMonth() + 1 });
+        date.setMonth(date.getMonth() + 1);
+        x += 65;
+      }
+      y += 70;
+    }
+  }();
+
+  var width = 210;
+  var height = 297;
+  var scale = 2;
+  svg.setAttribute('width', '' + width * scale);
+  svg.setAttribute('height', '' + height * scale);
+  svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+  var rect = crtSvg('rect');
+  rect.setAttribute('stroke', '#0000ff');
+  rect.setAttribute('fill', 'none');
+  rect.setAttribute('x', '0');
+  rect.setAttribute('y', '0');
+  rect.setAttribute('width', '' + width);
+  rect.setAttribute('height', '' + height);
+  svg.appendChild(rect);
+});
+
+var download = function() {
+
+  var filename = 'calendar.svg';
+
+  var svg = document.querySelector('svg').cloneNode(true);
+  svg.setAttribute('xmlns', svg.namespaceURI);
+  var data = svg.outerHTML;
+
+  var blob = new Blob([ data ], { type : 'application/octet-stream' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+};
+</script>
+</head>
+<body>
+<button onclick="download()"> download </button>
+<br/>
+<svg width="200" height="100">
+
+</svg>
+</body>
+</html>
