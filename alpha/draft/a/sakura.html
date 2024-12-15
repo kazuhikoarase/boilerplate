@@ -17,15 +17,17 @@
     <rect :x="0" :y="0" :width="params.width" :height="params.height" fill="#f0f0f0" stroke="none"></rect>
     <g id="hanabira" fill="none" stroke="#ff0000">
       <g v-for="i in range(params.v1)" :transform="t1(i, params.v1)">
+        <path :d="scut(params.v1, params.width / 2, params.height / 2, params.v3,
+          params.rx1, params.ry1, params.rx2, params.ry2)"></path>
         <path :d="sarc(params.v1, params.width / 2, params.height / 2, params.v3,
-          params.ry1, params.rx1)"></path>
+          params.rx1, params.ry1)"></path>
       </g>
     </g>
     <g id="kaben" fill="#ffffff" stroke="none">
       <g v-for="i in range(params.v2)" :transform="t1(i, params.v2)">
         <rect :x="params.width / 2 - params.w1 / 2" :y="params.height / 2"
           :width="params.w1" :height="params.l1"></rect>
-        <circle :cx="params.width / 2" :cy="params.height / 2 + (+params.l1)" :r="params.r1"></circle>
+        <circle :cx="params.width / 2" :cy="params.height / 2 + params.l1" :r="params.r1"></circle>
       </g>
     </g>
     <g id="guide" fill="none" stroke="#000000">
@@ -37,6 +39,8 @@
     <rng label="花びら-半径" min="10"  max="90" step="5" v-model="params.v3"></rng>
     <rng label="花びら-幅" min="10"  max="100" step="5" v-model="params.rx1"></rng>
     <rng label="花びら-高さ" min="10"  max="100" step="5" v-model="params.ry1"></rng>
+    <rng label="花びら切込-幅" min="0"  max="100" step="1" v-model="params.rx2"></rng>
+    <rng label="花びら切込-高さ" min="0"  max="100" step="1" v-model="params.ry2"></rng>
     <rng label="花弁(本)" min="0"  max="25" step="1" v-model="params.v2"></rng>
     <rng label="花弁-半径" min="20"  max="100" step="5" v-model="params.l1"></rng>
   </div>
@@ -65,9 +69,9 @@ Vue.createApp({
 
   components : {
     rng : {
-      template : `<div><label><span style="width:100px;display:inline-block;text-align:right;"
+      template : `<div><label><span style="width:120px;display:inline-block;text-align:right;"
           >{{label}}</span><input type="range" :min="min" :max="max" :step="step"
-          :value="modelValue" @input="$emit('update:modelValue', $event.target.value)"
+          :value="modelValue" @input="$emit('update:modelValue', +$event.target.value)"
         /> {{modelValue}}</label></div>`,
       props : {
         label : '',
@@ -101,12 +105,31 @@ Vue.createApp({
     sarc : function(n, cx, cy, cr, rx, ry) {
       var params = this.params;
       var t = Math.PI * 2 / n / 2;
-      var w = Math.sin(t) * cr + 0.5;
-      var h = Math.cos(t) * cr;
+      var x = Math.sin(t) * cr;
+      var y = Math.cos(t) * cr;
+      var gap = 0.5;
       return 'M' +
-        (cx - w) + ' ' + (cy + h) +
-        'A' + rx + ' ' + ry + ' 270 1 0 ' +
-        (cx + w) + ' ' + (cy + h);
+        (cx - x - gap) + ' ' + (cy + y) +
+        'A' + rx + ' ' + ry + ' ' +
+        '0 1 0 ' +
+        (cx + x + gap) + ' ' + (cy + y);
+    },
+    scut : function(n, cx, cy, cr, rx, ry, crx, cry) {
+      var params = this.params;
+      var t = Math.PI * 2 / n / 2;
+      var x = Math.sin(t) * cr;
+      var y = Math.cos(t) * cr;
+      var gap = 0.5;
+      var r = x / rx;
+      var dd = r > 1? 0 : Math.cos(Math.asin(r) ) * ry;
+      var dr = r > 1? ry * r : ry;
+      var cux = cx;
+      var cuy = cy + cr * Math.cos(t) + dd + dr;
+      var cuyf = 1;
+      return 'M' +
+        (cux - crx) + ' ' + (cuy + cuyf) +
+        'L' + (cux) + ' ' + (cuy - cry) +
+        'L' + (cux + crx) + ' ' + (cuy + cuyf);
     },
     guide : function(w, h) {
       var s = Math.min(w, h) * 0.45;
@@ -121,7 +144,7 @@ Vue.createApp({
     },
 
     download_clickHandler : function() {
-      var filename = '2_test.svg';
+      var filename = 'sakura.svg';
 
       var svg = document.querySelector('svg').cloneNode(true);
       svg.setAttribute('xmlns', svg.namespaceURI);
@@ -141,15 +164,17 @@ Vue.createApp({
   data: function() {
     return {
       params : {
-        rx1 : 40,
-        ry1 : 50,
+        rx1 : 50,
+        ry1 : 55,
+        rx2 : 10,
+        ry2 : 30,
         r1 : 10,
         w1 : 5,
         l1 : 50,
         v1 : 5,
         v2 : 10,
         v3 : 75,
-        v4 : 50,
+        v4 : 270,
         width : 550,
         height : 400
       },
