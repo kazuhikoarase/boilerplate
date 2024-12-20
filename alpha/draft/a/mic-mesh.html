@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+<head>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script>
+</script>
+</head>
+<body>
+
+<div id="app">
+  <div>
+    <button @click="download_clickHandler"> download </button>
+  </div>
+  <svg :width="width" :height="height">
+    <rect x="0" y="0" :width="width" :height="height" fill="#f0f0f0" stroke="none" />
+    <g fill="none" stroke="red">
+      <ellipse :cx="width / 2" :cy="height / 2" :rx="rmic" :ry="rmic" />
+      <ellipse v-for="n in range(divWires - 1)" :cx="width / 2" :cy="height / 2"
+         :rx="Math.sin(Math.PI / 2 / divWires * (n + 1) ) * rmic"
+         :ry="Math.sin(Math.PI / 2 / divWires * (n + 1) ) * rmic" />
+      <line :x1="width / 2" :y1="height / 2 - rmic"
+            :x2="width / 2" :y2="height / 2 + rmic" />
+      <line :x1="width / 2 - rmic" :y1="height / 2"
+            :x2="width / 2 + rmic" :y2="height / 2" />
+      <line v-for="n in range(divWires - 1)"
+            :x1="width / 2 + Math.sin(Math.PI / 2 / divWires * (n + 1) ) * rmic"
+            :y1="height / 2 - Math.sin(Math.PI / 2 - Math.PI / 2 / divWires * (n + 1) ) * rmic"
+            :x2="width / 2 + Math.sin(Math.PI / 2 / divWires * (n + 1) ) * rmic"
+            :y2="height / 2 + Math.sin(Math.PI / 2 - Math.PI / 2 / divWires * (n + 1) ) * rmic" />
+      <line v-for="n in range(divWires - 1)"
+            :x1="width / 2 - Math.sin(Math.PI / 2 / divWires * (n + 1) ) * rmic"
+            :y1="height / 2 - Math.sin(Math.PI / 2 - Math.PI / 2 / divWires * (n + 1) ) * rmic"
+            :x2="width / 2 - Math.sin(Math.PI / 2 / divWires * (n + 1) ) * rmic"
+            :y2="height / 2 + Math.sin(Math.PI / 2 - Math.PI / 2 / divWires * (n + 1) ) * rmic" />
+    </g>
+  </svg>
+  <svg :width="width" :height="height">
+    <rect x="0" y="0" :width="width" :height="height" fill="#f0f0f0" stroke="none" />
+    <g fill="none" stroke="#00f">
+      <ellipse :cx="width / 2" :cy="height / 2" :rx="rmic" :ry="rmic" />
+      <line :x1="width / 2" :y1="0"
+            :x2="width / 2" :y2="height" />
+      <line :x1="0" :y1="height / 2"
+            :x2="width" :y2="height / 2" />
+    </g>
+    <g fill="none" stroke="#fc0">
+      <line :x1="width / 2" :y1="height / 2 - rmic"
+            :x2="width / 2" :y2="height / 2 + rmic" />
+      <line :x1="width / 2 - rmic" :y1="height / 2"
+            :x2="width / 2 + rmic" :y2="height / 2" />
+    </g>
+    <g fill="none" stroke="#f00" v-html="mic(width, height, rmic, t, divWires)">
+    </g>
+  </svg>
+  <div>
+    <input type="range" min="0"  max="180" step="1" v-model="t" />{{t}}
+  </div>
+</div>
+
+<script>
+
+Vue.createApp({
+  methods : {
+    mic : function(width, height, r, t, n) {
+
+      var svg = '';
+
+      var rt = Math.PI / 180 * t;
+
+      var rtv = rt;
+      var rth = rt + Math.PI / 2;
+
+      var cx = width / 2;
+      var cy = height / 2;
+
+      // upper vier
+      !function() {
+        var cv = '#666';
+        var ch = '#999';
+        var N = n * 2 + 1;
+        for (var i = 0; i < N; i += 1) {
+          var rp = Math.PI / 2 * i / n;
+          svg += `<path d="M${cx + r * Math.cos(rtv - rp)} ${cy + r * Math.sin(rtv - rp)}
+                           L${cx + r * Math.cos(rtv + rp)} ${cy + r * Math.sin(rtv + rp)}"
+                           fill="" stroke="${cv}" />`;
+          svg += `<path d="M${cx + r * Math.cos(rth - rp)} ${cy + r * Math.sin(rth - rp)}
+                           L${cx + r * Math.cos(rth + rp)} ${cy + r * Math.sin(rth + rp)}"
+                           fill="" stroke="${ch}" />`;
+        }
+      }();
+
+      !function() {
+        var N = n * 2 + 1;
+        //var N = n * 4;
+        for (var i = 0; i < N; i += 1) {
+          var rp = Math.PI / 2 * i / n;
+          var rc = rth - rp;
+          if (!(0 <= rc && rc <= Math.PI) ) {
+            continue;
+          }
+          svg += `<path d="M${cx + r * Math.cos(rc)} ${cy - r * Math.sin(rc)}
+                           L${cx + r * Math.cos(rc)} ${cy + r * Math.sin(rc)}"
+                           fill="" stroke="#f0f" stroke-width="2" />`;
+        }
+      }();
+
+      return svg;
+    },
+    range : function(n) {
+      var a = [];
+      for (var i = 0; i < n; i += 1) {
+        a.push(i);
+      }
+      return a;
+    },
+    download_clickHandler : function() {
+      var filename = '2_test.svg';
+
+      var svg = document.querySelector('svg').cloneNode(true);
+      svg.setAttribute('xmlns', svg.namespaceURI);
+      var data = svg.outerHTML;
+
+      var blob = new Blob([ data ], { type : 'application/octet-stream' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  },
+  data: function() {
+    return {
+//      divWires : 12,
+      divWires : 4,
+      rmic : 50,
+      width : 250,
+      height : 200,
+      t: 90
+    }
+  },
+  mounted: function() {
+  }
+}).mount('#app');
+
+</script>
+</body>
+</html>
