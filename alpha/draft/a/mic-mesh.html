@@ -73,7 +73,7 @@ Vue.createApp({
 
       var cx = width / 2;
       var cy = height / 2;
-
+/*
       // upper guide
       !function() {
         var cs = '#f00';
@@ -92,6 +92,7 @@ Vue.createApp({
         }
         svg += `</g>`;
       }();
+      */
 /*
       // front guide
       !function() {
@@ -106,66 +107,42 @@ Vue.createApp({
           }
           svg += `<path d="M${cx + r * Math.cos(rc)} ${cy - r * Math.sin(rc)}
                            L${cx + r * Math.cos(rc)} ${cy + r * Math.sin(rc)}"
-                           fill="none" stroke="#f0f" stroke-width="2" />`;
+                          fill="none" stroke="#f0f" stroke-width="2" />`;
         }
         svg += `</g>`;
       }();
 */
-      var arc = function(t, a, b) {
-        var rx = Math.abs(r * Math.cos(b) * Math.cos(a) - r * Math.cos(a + b) );
-        var ry = Math.abs(r * Math.sin(b) );
-        var rcx = r * Math.cos(b) * Math.cos(a);
-        var rcy = 0;
+      var arc = function(a, b, offset, color) {
+        const aa = a + offset;
+        const rx = r * Math.cos(b) * Math.cos(aa) - r * Math.cos(aa + b);
+        const ry = r * Math.sin(b);
+        const rcx = r * Math.cos(b) * Math.cos(aa);
+        const rcy = 0;
+        const threshold = 0.001;
         var svg = '';
-
-        svg += `<ellipse cx="${cx + rcx}" cy="${cy + rcy}" rx="${rx}" ry="${ry}"
-          fill="none" stroke="#f0f" />`;
-
-        if (r * Math.cos(t) >= 0) {
-          if (Math.sin(t) >= 0) {
-            svg += `<path d="M${cx} ${cy - r}
-              A${r * Math.sin(t)} ${r} 0 0 0 ${cx} ${cy + r}"
-              fill="none" stroke="#f00" />`;
-            svg += `<circle cx="${cx - r * Math.sin(t)}" cy="${cy}" r="5" fill="none" stroke="#f00" />`;
-          } else {
-            svg += `<path d="M${cx} ${cy - r}
-              A${r * Math.sin(t)} ${r} 0 0 1 ${cx} ${cy + r}"
-              fill="none" stroke="#00f" />`;
-            svg += `<circle cx="${cx - r * Math.sin(t)}" cy="${cy}" r="5" fill="none" stroke="#00f" />`;
+        if (rx >= 0) {
+          if (Math.cos(a) < threshold) {
+            svg += `<path d="M${cx + rcx} ${cy + rcy - ry}
+              A${rx} ${ry} 0 0 0 ${cx + rcx} ${cy + rcy + ry}"
+              fill="none" stroke="${color}" />`;
+          }
+        } else {
+          if (Math.cos(a) < threshold) {
+            svg += `<path d="M${cx + rcx} ${cy + rcy + ry}
+              A${rx} ${ry} 0 0 1 ${cx + rcx} ${cy + rcy - ry}"
+              fill="none" stroke="${color}" />`;
           }
         }
         return svg;
       };
 
       !function() {
-        var cs = '#f00';
         var N = n * 4;
-//        N = 1;
-
         svg += `<g id="grid">`;
         for (var i = 0; i < N; i += 1) {
           var rp = Math.PI / 2 * i / n;
-          var rc = rth - rp;
-/*
-          if (!(0 <= rc && rc <= Math.PI) ) {
-            continue;
-          }
-*/
-          /*
-          svg += `<path d="M${cx + r * Math.cos(rc)} ${cy + r * Math.sin(rth - rp)}
-                           L${cx + r * Math.cos(rc)} ${cy + r * Math.sin(rth + rp)}"
-                           fill="" stroke="${i == n? cs : ch}" />`;
-          */
-
-          svg += arc(rc, rth, rp);
-
-          /*
-*/
-          /*
-          svg += `<path d="M${cx} ${cy - r}
-            A${r * Math.cos(rc)} ${r} 0 0 ${Math.PI * .5 <= rc && rc < Math.PI * 1.5? 0 : 1} ${cx} ${cy + r}"
-            fill="none" stroke="#f00" stroke-width="2" />`;
-            */
+          svg += arc(rth, rp, 0, '#333');
+//          svg += arc(rth, rp, Math.PI / 2, '#00f');
         }
         svg += `</g>`;
 
@@ -183,7 +160,7 @@ Vue.createApp({
     download_clickHandler : function() {
       var filename = '2_test.svg';
 
-      var svg = document.querySelector('svg').cloneNode(true);
+      var svg = document.querySelectorAll('svg')[1].cloneNode(true);
       svg.setAttribute('xmlns', svg.namespaceURI);
       var data = svg.outerHTML;
 
@@ -200,7 +177,7 @@ Vue.createApp({
   data: function() {
     return {
 //      divWires : 12,
-      divWires : 4,
+      divWires : 6,
       rmic : 50,
       width : 250,
       height : 200,
