@@ -1,0 +1,14 @@
+.msg-area {
+  width : 600px;
+  height : 300px;
+}
+
+.splitted-msg {
+  width : 600px;
+  height : 200px;
+  border : 1px solid #ccc;
+}
+
+.msg-error {
+  color : #ff0000;
+}

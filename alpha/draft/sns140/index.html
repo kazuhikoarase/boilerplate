@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script
+    src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+    crossorigin="anonymous"></script>
+  <script src="index.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <textarea class="msg-area" v-model="msg"></textarea>
+    <div v-for="msg in msgList">
+      <textarea class="splitted-msg" :value="msg"
+        @click="$event.target.select()" readonly="readonly"></textarea>
+      <span :class="msg.length &gt; 140? 'msg-error' : ''"> {{msg.length}}</span>
+    </div>
+  </div>
+</body>
+</html>
