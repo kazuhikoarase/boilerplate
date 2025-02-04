@@ -22,15 +22,15 @@
     <g v-mat4="mat4().translate({x: width / 2, y: height / 2})">
       <g v-mat4="mat4().rotateY(d2r(p) )">
         <g v-mat4="mat4().rotateX(d2r(t) )">
-          <path d="M-100 0L100 0" fill="none" stroke="#f00" v-tran4 />
-          <path d="M-100 0L100 0" fill="none" stroke="#0f0" v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
-          <path d="M-100 0L100 0" fill="none" stroke="#00f" v-tran4 v-mat4="mat4().rotateY(d2r(90))" />
-          <rect :x="-100" :y="-100" width="200" height="200" fill="#f00" stroke="#900" opacity="0.2"
-            v-tran4 />
-          <rect :x="-100" :y="-100" width="200" height="200" fill="#0f0" stroke="#090" opacity="0.2"
-            v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
+          <path d="M-100 0L100 0" fill="none" stroke="#00f" v-tran4 />
+          <path d="M-100 0L100 0" fill="none" stroke="#0f0" v-tran4 v-mat4="mat4().rotateY(d2r(90))" />
+          <path d="M-100 0L100 0" fill="none" stroke="#f00" v-tran4 v-mat4="mat4().rotateZ(d2r(90))" />
           <rect :x="-100" :y="-100" width="200" height="200" fill="#00f" stroke="#009" opacity="0.2"
             v-tran4 v-mat4="mat4().rotateY (d2r(90))" />
+          <rect :x="-100" :y="-100" width="200" height="200" fill="#0f0" stroke="#090" opacity="0.2"
+            v-tran4 />
+          <rect :x="-100" :y="-100" width="200" height="200" fill="#f00" stroke="#900" opacity="0.2"
+            v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
         </g>
       </g>
     </g>
