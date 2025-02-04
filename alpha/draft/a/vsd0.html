@@ -33,9 +33,9 @@
   </svg>
   <div>
     <div><label><span class="ttl">Pan:</span>
-      <input type="range" min="0" max="360" step="1" v-model="p" />{{p}}</label></div>
+      <input type="range" min="-180" max="180" step="1" v-model="p" />{{p}}</label></div>
     <div><label><span class="ttl">Tilt:</span>
-      <input type="range" min="0" max="360" step="1" v-model="t" />{{t}}</label></div>
+      <input type="range" min="-180" max="180" step="1" v-model="t" />{{t}}</label></div>
   </div>
 </div>
 
@@ -101,8 +101,8 @@ Vue.createApp({
     return {
       width : 400,
       height : 300,
-      p: 0,
-      t: 0,
+      p: 30,
+      t: 10,
     }
   },
   computed : {
