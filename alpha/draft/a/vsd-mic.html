@@ -5,9 +5,12 @@
   <script src="svgtk.js" ></script>
   <style>
 .ttl {
-  display: inline-block;
-  width: 50px;
-  text-align: right;
+  display : inline-block;
+  width : 50px;
+  text-align : right;
+}
+.rng {
+  width : 200px;
 }
   </style>
 </head>
@@ -22,9 +25,9 @@
     <g v-mat4="mat4().translate({x: width / 2, y: height / 2 + 20})">
       <g v-mat4="mat4().rotateY(d2r(p) ).rotateX(d2r(t) )">
 
-        <path d="M-150 0L150 0" fill="none" stroke="#00f" v-tran4 />
-        <path d="M-150 0L150 0" fill="none" stroke="#0f0" v-tran4 v-mat4="mat4().rotateY(d2r(90))" />
-        <path d="M-150 0L0 0" fill="none" stroke="#f00" v-tran4 v-mat4="mat4().rotateZ(d2r(90))" />
+        <path :d="`M${-axis} 0L${axis} 0`" fill="none" stroke="#00f" v-tran4 />
+        <path :d="`M${-axis} 0L${axis} 0`" fill="none" stroke="#0f0" v-tran4 v-mat4="mat4().rotateY(d2r(90))" />
+        <path :d="`M${-axis} 0L0 0`" fill="none" stroke="#f00" v-tran4 v-mat4="mat4().rotateZ(d2r(90))" />
 
         <path :d="`M${-r} 0A${r} ${r} 0 0 1 ${r} 0`" fill="none" stroke="#0f0"
           v-tran4 />
@@ -33,25 +36,22 @@
         <circle cx="0" cy="0" :r="`${r}`" fill="none" stroke="#f00"
           v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
 
-        <path :d="`M${Math.cos(Math.PI * a) * r} ${Math.sin(Math.PI * a) * r}L0 0`"
-          fill="none" stroke="#000"
+        <path :d="`M${-xy} 0A${xy} ${gr} 0 0 1 ${xy} 0`" fill="none" stroke="#000" stroke-width="2"
+          v-tran4 v-mat4="mat4().rotateY(d2r(90)).rotateZ(-ga).translateX(xx)" />
+
+
+        <path :d="`M${xx} ${xy}L0 0`" fill="none" stroke="#000"
           v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
-        <path :d="`M${Math.cos(- Math.PI * a) * r} ${- Math.sin(Math.PI * a) * r}L0 0`"
-          fill="none" stroke="#000"
+        <path :d="`M${xx} ${-xy}L0 0`" fill="none" stroke="#000"
           v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
-        <path :d="`M${(0.5 - a) * r * 2} 0
-                   L${(0.5 - a) * r * 2} ${-r * 2 * Math.sqrt(0.5 * 0.5 - (0.5 - a) * (0.5 - a) )}`"
-          fill="none" stroke="#000"
+        <path :d="`M${zx} 0 L${zx} ${-zy}`" fill="none" stroke="#000"
           v-tran4 />
 
-        <circle :cx="`${Math.cos(Math.PI * a) * r}`" :cy="`${Math.sin(Math.PI * a) * r}`"
-          r="4" fill="#000" stroke="none"
+        <circle :cx="`${xx}`" :cy="`${xy}`" r="4" fill="#000" stroke="none"
           v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
-        <circle :cx="`${Math.cos(- Math.PI * a) * r}`" :cy="`${- Math.sin(Math.PI * a) * r}`"
-          r="4" fill="#000" stroke="none"
+        <circle :cx="`${xx}`" :cy="`${-xy}`" r="4" fill="#000" stroke="none"
           v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
-        <circle :cx="`${(0.5 - a) * r * 2}`" :cy="`${-r * 2 * Math.sqrt(0.5 * 0.5 - (0.5 - a) * (0.5 - a) )}`"
-          r="4" fill="#000" stroke="none"
+        <circle :cx="`${zx}`" :cy="`${-zy}`" r="4" fill="#000" stroke="none"
           v-tran4 />
 
       </g>
@@ -59,11 +59,11 @@
   </svg>
   <div>
     <div><label><span class="ttl">Pan:</span>
-      <input type="range" min="-180" max="180" step="1" v-model="p" />{{p}}</label></div>
+      <input type="range" class="rng" min="-180" max="180" step="1" v-model="p" />{{p}}</label></div>
     <div><label><span class="ttl">Tilt:</span>
-      <input type="range" min="-180" max="180" step="1" v-model="t" />{{t}}</label></div>
+      <input type="range" class="rng" min="-180" max="180" step="1" v-model="t" />{{t}}</label></div>
     <div><label><span class="ttl">Alpha:</span>
-      <input type="range" min="0" max="1" step="0.05" v-model="a" />{{a}}</label></div>
+      <input type="range" class="rng" min="0" max="1" step="0.01" v-model="a" />{{a}}</label></div>
   </div>
 </div>
 
@@ -98,6 +98,9 @@ Vue.createApp({
     d2r : function(deg) {
       return deg / 180 * Math.PI;
     },
+    trib : function(r, a) {
+      return Math.sqrt(r * r - a * a);
+    },
     download_clickHandler : function() {
       var filename = 'test.svg';
 
@@ -129,6 +132,7 @@ Vue.createApp({
     return {
       width : 400,
       height : 300,
+      axis : 160,
       r : 110,
       p : 33,
       t : 21,
@@ -136,13 +140,36 @@ Vue.createApp({
     }
   },
   computed : {
-    global : function() {
-      return this.mat4().
-        translate({x : -this.width / 2, y : -this.height / 2}).
-        rotateX(this.t / 180 * Math.PI).
-        rotateY(this.p / 180 * Math.PI).
-        translate({x : this.width / 2, y : this.height / 2});
-    }
+    xx : function() {
+      const r = this.r;
+      const a = this.a;
+      return Math.cos(Math.PI * a) * r;
+    },
+    xy : function() {
+      const r = this.r;
+      const a = this.a;
+      return Math.sin(Math.PI * a) * r;
+    },
+    zx : function() {
+      const r = this.r;
+      const a = this.a;
+      return (0.5 - a) * r * 2;
+    },
+    zy : function() {
+      const r = this.r;
+      const a = this.a;
+      return r * 2 * Math.sqrt(0.5 * 0.5 - (0.5 - a) * (0.5 - a) );
+    },
+    gr : function() {
+      const x = this.xx - this.zx;
+      const y = this.zy;
+      return Math.sqrt(x * x + y * y);
+    },
+    ga : function() {
+      const x = this.xx - this.zx;
+      const y = this.zy;
+      return Math.PI / 2 - Math.atan2(y, x);
+    },
   },
   mounted: function() {
   }
