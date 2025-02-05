@@ -36,26 +36,7 @@
         <circle cx="0" cy="0" :r="`${r}`" fill="none" stroke="#f00"
           v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
 
-        <path :d="`M${-xy} 0A${xy} ${gr} 0 0 1 ${xy} 0`" fill="none" stroke="#000" stroke-width="2"
-          v-tran4 v-mat4="mat4().rotateY(d2r(90)).rotateZ(-ga).translateX(xx)" />
-        <path :d="`M${-xy} 0A${xy} ${gr} 0 0 1 ${xy} 0`" fill="#000" stroke="none" opacity="0.2"
-          v-tran4 v-mat4="mat4().rotateY(d2r(90)).rotateZ(-ga).translateX(xx)" />
-
-        <path :d="`M${xx} ${xy}L0 0`" fill="none" stroke="#000"
-          v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
-        <path :d="`M${xx} ${-xy}L0 0`" fill="none" stroke="#000"
-          v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
-        <path :d="`M${zx} ${-zy}L0 0`" fill="none" stroke="#000"
-          v-tran4  />
-        <path :d="`M${zx} 0 L${zx} ${-zy}`" fill="none" stroke="#000"
-          v-tran4 />
-
-        <circle :cx="`${xx}`" :cy="`${xy}`" r="4" fill="#000" stroke="none"
-          v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
-        <circle :cx="`${xx}`" :cy="`${-xy}`" r="4" fill="#000" stroke="none"
-          v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
-        <circle :cx="`${zx}`" :cy="`${-zy}`" r="4" fill="#000" stroke="none"
-          v-tran4 />
+        <moge :r="r" :a="a" :sys="[t, p, a]"></moge>
 
       </g>
     </g>
@@ -72,38 +53,121 @@
 
 <script>
 
-var fn = {
-  mat4 : function(el, binding, vnode) {
-    el.dataset.mat4 = JSON.stringify(binding.value);
-  },
-  tran4 : function(el, binding, vnode) {
-    var app = binding.instance;
-    var mat = function(el) {
-      var mat = app.mat4();
-      while (el) {
-        if (el.dataset && el.dataset.mat4) {
-          mat = mat.concat(JSON.parse(el.dataset.mat4) );
+var mixin = function() {
+
+  var fn = {
+    mat4 : function(el, binding, vnode) {
+      el.dataset.mat4 = JSON.stringify(binding.value);
+    },
+    tran4 : function(el, binding, vnode) {
+      var app = binding.instance;
+      var mat = function(el) {
+        var mat = app.mat4();
+        while (el) {
+          if (el.dataset && el.dataset.mat4) {
+            mat = mat.concat(JSON.parse(el.dataset.mat4) );
+          }
+          el = el.parentNode;
         }
-        el = el.parentNode;
+        return mat;
+      }(el);
+      el.setAttribute('transform', fn.toSvgMatrix(mat) )
+    },
+    toSvgMatrix : function(mat) {
+      return `matrix(${mat[0]} ${mat[1]} ${mat[4]} ${mat[5]} ${mat[12]} ${mat[13]})`;
+    }
+  };
+
+  return {
+    methods : {
+      mat4 : svgtk.math.mat4,
+      d2r : function(deg) {
+        return deg / 180 * Math.PI;
+      },
+    },
+    directives : {
+      mat4 : {
+        beforeMount : fn.mat4,
+        beforeUpdate : fn.mat4,
+      },
+      tran4 : {
+        mounted : fn.tran4,
+        updated : fn.tran4,
       }
-      return mat;
-    }(el);
-    el.setAttribute('transform', fn.toSvgMatrix(mat) )
-  },
-  toSvgMatrix : function(mat) {
-    return `matrix(${mat[0]} ${mat[1]} ${mat[4]} ${mat[5]} ${mat[12]} ${mat[13]})`;
-  }
-};
+    }
+  };
+}();
+
 
 Vue.createApp({
+  components : {
+    moge : {
+      template : `<g>
+          <path :d="\`M\${-xy} 0A\${xy} \${gr} 0 0 1 \${xy} 0\`" fill="#000" stroke="none" opacity="0.2"
+            v-tran4 v-mat4="mat4().rotateY(d2r(90)).rotateZ(-ga).translateX(xx)" />
+          <path :d="\`M\${-xy} 0A\${xy} \${gr} 0 0 1 \${xy} 0\`" fill="none" stroke="#000" stroke-width="2"
+            v-tran4 v-mat4="mat4().rotateY(d2r(90)).rotateZ(-ga).translateX(xx)" />
+
+          <path :d="\`M\${xx} \${xy}L0 0\`" fill="none" stroke="#000"
+            v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
+          <path :d="\`M\${xx} \${-xy}L0 0\`" fill="none" stroke="#000"
+            v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
+          <path :d="\`M\${zx} \${-zy}L0 0\`" fill="none" stroke="#000"
+            v-tran4  />
+          <path :d="\`M\${zx} 0 L\${zx} \${-zy}\`" fill="none" stroke="#000"
+            v-tran4 />
+
+          <circle :cx="\`\${xx}\`" :cy="\`\${xy}\`" r="4" fill="#000" stroke="none"
+            v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
+          <circle :cx="\`\${xx}\`" :cy="\`\${-xy}\`" r="4" fill="#000" stroke="none"
+            v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
+          <circle :cx="\`\${zx}\`" :cy="\`\${-zy}\`" r="4" fill="#000" stroke="none"
+            v-tran4 />
+        </g>`,
+      props : {
+        r : { type : [Number, String] },
+        a : { type : [Number, String] },
+        sys : { type : Object },
+      },
+      computed : {
+        xx : function() {
+          const r = +this.r;
+          const a = +this.a;
+          return Math.cos(Math.PI * a) * r;
+        },
+        xy : function() {
+          const r = +this.r;
+          const a = +this.a;
+          return Math.sin(Math.PI * a) * r;
+        },
+        zx : function() {
+          const r = +this.r;
+          const a = +this.a;
+          return (0.5 - a) * r * 2;
+        },
+        zy : function() {
+          const r = +this.r;
+          const a = +this.a;
+          return r * 2 * Math.sqrt(0.5 * 0.5 - (0.5 - a) * (0.5 - a) );
+        },
+        gr : function() {
+          const x = this.xx - this.zx;
+          const y = this.zy;
+          return Math.sqrt(x * x + y * y);
+        },
+        ga : function() {
+          const x = this.xx - this.zx;
+          const y = this.zy;
+          return Math.PI / 2 - Math.atan2(y, x);
+        },
+      },
+      mixins : [ mixin ],
+      mounted : function() {
+        console.log('mogemoge!');
+      }
+    }
+  },
   methods : {
-    mat4 : svgtk.math.mat4,
-    d2r : function(deg) {
-      return deg / 180 * Math.PI;
-    },
-    trib : function(r, a) {
-      return Math.sqrt(r * r - a * a);
-    },
     download_clickHandler : function() {
       var filename = 'test.svg';
 
@@ -121,16 +185,7 @@ Vue.createApp({
       document.body.removeChild(a);
     }
   },
-  directives : {
-    mat4 : {
-      beforeMount : fn.mat4,
-      beforeUpdate : fn.mat4,
-    },
-    tran4 : {
-      mounted : fn.tran4,
-      updated : fn.tran4,
-    }
-  },
+  mixins : [ mixin ],
   data : function() {
     return {
       width : 400,
@@ -141,38 +196,6 @@ Vue.createApp({
       t : 21,
       a : 0.3,
     }
-  },
-  computed : {
-    xx : function() {
-      const r = this.r;
-      const a = this.a;
-      return Math.cos(Math.PI * a) * r;
-    },
-    xy : function() {
-      const r = this.r;
-      const a = this.a;
-      return Math.sin(Math.PI * a) * r;
-    },
-    zx : function() {
-      const r = this.r;
-      const a = this.a;
-      return (0.5 - a) * r * 2;
-    },
-    zy : function() {
-      const r = this.r;
-      const a = this.a;
-      return r * 2 * Math.sqrt(0.5 * 0.5 - (0.5 - a) * (0.5 - a) );
-    },
-    gr : function() {
-      const x = this.xx - this.zx;
-      const y = this.zy;
-      return Math.sqrt(x * x + y * y);
-    },
-    ga : function() {
-      const x = this.xx - this.zx;
-      const y = this.zy;
-      return Math.PI / 2 - Math.atan2(y, x);
-    },
   },
   mounted: function() {
   }
