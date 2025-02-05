@@ -102,10 +102,8 @@ Vue.createApp({
   components : {
     moge : {
       template : `<g>
-          
           <path :d="\`M\${-xy} 0A\${xy} \${gr} 0 0 1 \${xy} 0\`" fill="#000" stroke="none" opacity="0.02"
             v-tran4 v-mat4="mat4().rotateY(d2r(90)).rotateZ(-ga).translateX(xx)" />
-          
           <path :d="\`M\${-xy} 0A\${xy} \${gr} 0 0 1 \${xy} 0\`" fill="none" stroke="#000" stroke-width="3"
             v-tran4 v-mat4="mat4().rotateY(d2r(90)).rotateZ(-ga).translateX(xx)" />
 
