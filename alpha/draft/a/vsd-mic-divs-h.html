@@ -35,8 +35,10 @@
           v-tran4 v-mat4="mat4().rotateY (d2r(90))" />
         <circle cx="0" cy="0" :r="`${r}`" fill="none" stroke="#f00"
           v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
-
-        <moge v-for="a" :r="r" :a="a" :sys="[t, p, n]"></moge>
+<!--
+        <grill v-for="a" :r="r" :a="a" :b="b" :sys="[t, p, n]"></grill>
+ -->
+        <grill v-for="a in divs" :r="r" :a="a" :b="b" :sys="[t, p, n]"></grill>
 
       </g>
     </g>
@@ -48,6 +50,8 @@
       <input type="range" class="rng" min="-180" max="180" step="1" v-model="t" />{{t}}</label></div>
     <div><label><span class="ttl">Alpha:</span>
       <input type="range" class="rng" min="0" max="1" step="0.01" v-model="a" />{{a}}</label></div>
+    <div><label><span class="ttl">Beta:</span>
+      <input type="range" class="rng" min="0" max="0.5" step="0.01" v-model="b" />{{b}}</label></div>
     <div><label><span class="ttl">n:</span>
       <input type="range" class="rng" min="2" max="12" step="1" v-model="n" />{{n}}</label></div>
   </div>
@@ -102,14 +106,14 @@ var mixin = function() {
 
 Vue.createApp({
   components : {
-    moge : {
+    grill : {
       template : `<g>
-<!--
+
           <path :d="\`M\${-xy} 0A\${xy} \${gr} 0 0 1 \${xy} 0\`" fill="#000" stroke="none" opacity="0.02"
             v-tran4 v-mat4="mat4().rotateY(d2r(90)).rotateZ(-ga).translateX(xx)" />
           <path :d="\`M\${-xy} 0A\${xy} \${gr} 0 0 1 \${xy} 0\`" fill="none" stroke="#000" stroke-width="3"
             v-tran4 v-mat4="mat4().rotateY(d2r(90)).rotateZ(-ga).translateX(xx)" />
--->
+
           <path :d="\`M\${xx} \${xy}L0 0\`" fill="none" stroke="#000"
             v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
           <path :d="\`M\${xx} \${-xy}L0 0\`" fill="none" stroke="#000"
@@ -120,40 +124,46 @@ Vue.createApp({
           <path :d="\`M\${zx} 0 L\${zx} \${-zy}\`" fill="none" stroke="#000"
             v-tran4 />
 
-
+          <!--
           <circle :cx="\`\${xx}\`" :cy="\`\${xy}\`" r="4" fill="#000" stroke="none"
             v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
           <circle :cx="\`\${xx}\`" :cy="\`\${-xy}\`" r="4" fill="#000" stroke="none"
             v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
           <circle :cx="\`\${zx}\`" :cy="\`\${-zy}\`" r="4" fill="#f00" stroke="none"
             v-tran4 />
+          -->
 
         </g>`,
       props : {
         r : { type : [Number, String] },
         a : { type : [Number, String] },
+        b : { type : [Number, String] },
         sys : { type : Object },
       },
       computed : {
         xx : function() {
           const r = +this.r;
           const a = +this.a;
-          return Math.cos(Math.PI * a) * r;
+          const b = +this.b;
+          const t = (1 - b * 2) * a + b;
+          return Math.cos(Math.PI * t) * r;
         },
         xy : function() {
           const r = +this.r;
           const a = +this.a;
-          return Math.sin(Math.PI * a) * r;
+          const b = +this.b;
+          const t = (1 - b * 2) * a + b;
+          return Math.sin(Math.PI * t) * r;
         },
         zx : function() {
           const r = +this.r;
           const a = +this.a;
-          return r * 2 * Math.sqrt(0.5 * 0.5 - (0.5 - a) * (0.5 - a) );
+          return Math.cos(Math.PI * a) * r;
         },
         zy : function() {
           const r = +this.r;
           const a = +this.a;
-          return r * 2 * (0.5 - a);
+          return Math.sin(Math.PI * a) * r;
         },
         gr : function() {
           const x = this.xx - this.zx;
@@ -210,6 +220,7 @@ Vue.createApp({
       p : 33,
       t : 21,
       a : 0.3,
+      b : 0.05,
       n : 2,
     }
   },

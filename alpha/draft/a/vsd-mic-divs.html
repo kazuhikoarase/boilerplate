@@ -36,7 +36,7 @@
         <circle cx="0" cy="0" :r="`${r}`" fill="none" stroke="#f00"
           v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
 
-        <moge v-for="a in divs" :r="r" :a="a" :sys="[t, p, n]"></moge>
+        <grill v-for="a in divs" :r="r" :a="a" :sys="[t, p, n]"></grill>
 
       </g>
     </g>
@@ -100,7 +100,7 @@ var mixin = function() {
 
 Vue.createApp({
   components : {
-    moge : {
+    grill : {
       template : `<g>
           <path :d="\`M\${-xy} 0A\${xy} \${gr} 0 0 1 \${xy} 0\`" fill="#000" stroke="none" opacity="0.02"
             v-tran4 v-mat4="mat4().rotateY(d2r(90)).rotateZ(-ga).translateX(xx)" />
