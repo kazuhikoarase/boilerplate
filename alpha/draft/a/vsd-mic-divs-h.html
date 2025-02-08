@@ -38,8 +38,20 @@
 <!--
         <grill v-for="a" :r="r" :a="a" :b="b" :sys="[t, p, n]"></grill>
  -->
-        <grill v-for="a in divs" :r="r" :a="a" :b="b" :sys="[t, p, n]"></grill>
+<!-- 
+        <g fill="none" stroke="#f00" stroke-width="3">
+          <grill v-for="a in divs" :r="r" :a="a" :b="b" :sys="[t, p, n]"></grill>
+          <grill v-for="a in divs" :r="r" :a="a" :b="b" :sys="[t, p, n]"
+            v-mat4="mat4().rotateX(d2r(180))"></grill>
+        </g>
+ -->
 
+        <g fill="none" stroke="#00f" stroke-width="3">
+          <grill v-for="a in divs" :r="r" :a="a" :b="b" :sys="[t, p, n]"
+            v-mat4="mat4().rotateY(d2r(90))"></grill>
+          <grill v-for="a in divs" :r="r" :a="a" :b="b" :sys="[t, p, n]"
+            v-mat4="mat4().rotateY(d2r(90)).rotateX(d2r(180))"></grill>
+        </g>
       </g>
     </g>
   </svg>
@@ -49,9 +61,9 @@
     <div><label><span class="ttl">Tilt:</span>
       <input type="range" class="rng" min="-180" max="180" step="1" v-model="t" />{{t}}</label></div>
     <div><label><span class="ttl">Alpha:</span>
-      <input type="range" class="rng" min="0" max="1" step="0.01" v-model="a" />{{a}}</label></div>
+      <input type="range" class="rng" min="0" max="1" step="0.005" v-model="a" />{{a}}</label></div>
     <div><label><span class="ttl">Beta:</span>
-      <input type="range" class="rng" min="0" max="0.5" step="0.01" v-model="b" />{{b}}</label></div>
+      <input type="range" class="rng" min="0" max="0.5" step="0.005" v-model="b" />{{b}}</label></div>
     <div><label><span class="ttl">n:</span>
       <input type="range" class="rng" min="2" max="12" step="1" v-model="n" />{{n}}</label></div>
   </div>
@@ -109,6 +121,10 @@ Vue.createApp({
     grill : {
       template : `<g>
 
+          <path :d="\`M\${-xy} 0A\${xy} \${gr} 0 0 1 \${xy} 0\`"
+            v-tran4 v-mat4="mat4().rotateY(d2r(90)).rotateZ(-ga).translateX(xx)" />
+
+          <!--
           <path :d="\`M\${-xy} 0A\${xy} \${gr} 0 0 1 \${xy} 0\`" fill="#000" stroke="none" opacity="0.02"
             v-tran4 v-mat4="mat4().rotateY(d2r(90)).rotateZ(-ga).translateX(xx)" />
           <path :d="\`M\${-xy} 0A\${xy} \${gr} 0 0 1 \${xy} 0\`" fill="none" stroke="#000" stroke-width="3"
@@ -124,7 +140,6 @@ Vue.createApp({
           <path :d="\`M\${zx} 0 L\${zx} \${-zy}\`" fill="none" stroke="#000"
             v-tran4 />
 
-          <!--
           <circle :cx="\`\${xx}\`" :cy="\`\${xy}\`" r="4" fill="#000" stroke="none"
             v-tran4 v-mat4="mat4().rotateX(d2r(90))" />
           <circle :cx="\`\${xx}\`" :cy="\`\${-xy}\`" r="4" fill="#000" stroke="none"
@@ -217,11 +232,11 @@ Vue.createApp({
       height : 450,
       axis : 320,
       r : 200,
-      p : 33,
-      t : 21,
+      p : 45,
+      t : 0,
       a : 0.3,
-      b : 0.05,
-      n : 2,
+      b : 0.07,
+      n : 10,
     }
   },
   mounted: function() {
