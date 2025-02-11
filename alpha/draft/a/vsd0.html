@@ -45,35 +45,53 @@
 
 !function() {
 
-  var fn = {
-    mat4 : function(el, binding, vnode) {
-      el.dataset.mat4 = JSON.stringify(binding.value);
-    },
-    tran4 : function(el, binding, vnode) {
-      const app = binding.instance;
-      const mat = function(el) {
-        var mat = app.mat4();
-        while (el) {
-          if (el.dataset && el.dataset.mat4) {
-            mat = mat.concat(JSON.parse(el.dataset.mat4) );
+  const mixin = function() {
+
+    const fn = {
+      mat4 : function(el, binding, vnode) {
+        el.dataset.mat4 = JSON.stringify(binding.value);
+      },
+      tran4 : function(el, binding, vnode) {
+        const app = binding.instance;
+        const mat = function(el) {
+          var mat = app.mat4();
+          while (el) {
+            if (el.dataset && el.dataset.mat4) {
+              mat = mat.concat(JSON.parse(el.dataset.mat4) );
+            }
+            el = el.parentNode;
           }
-          el = el.parentNode;
+          return mat;
+        }(el);
+        el.setAttribute('transform', fn.toSvgMatrix(mat) )
+      },
+      toSvgMatrix : function(mat) {
+        return `matrix(${mat[0]} ${mat[1]} ${mat[4]} ${mat[5]} ${mat[12]} ${mat[13]})`;
+      }
+    };
+
+    return {
+      methods : {
+        mat4 : svgtk.math.mat4,
+        d2r : function(deg) {
+          return deg / 180 * Math.PI;
+        },
+      },
+      directives : {
+        mat4 : {
+          beforeMount : fn.mat4,
+          beforeUpdate : fn.mat4,
+        },
+        tran4 : {
+          mounted : fn.tran4,
+          updated : fn.tran4,
         }
-        return mat;
-      }(el);
-      el.setAttribute('transform', fn.toSvgMatrix(mat) )
-    },
-    toSvgMatrix : function(mat) {
-      return `matrix(${mat[0]} ${mat[1]} ${mat[4]} ${mat[5]} ${mat[12]} ${mat[13]})`;
-    }
-  };
+      }
+    };
+  }();
 
   Vue.createApp({
     methods : {
-      mat4 : svgtk.math.mat4,
-      d2r : function(deg) {
-        return deg / 180 * Math.PI;
-      },
       download_clickHandler : function() {
         var filename = 'test.svg';
 
@@ -91,16 +109,7 @@
         document.body.removeChild(a);
       }
     },
-    directives : {
-      mat4 : {
-        beforeMount : fn.mat4,
-        beforeUpdate : fn.mat4,
-      },
-      tran4 : {
-        mounted : fn.tran4,
-        updated : fn.tran4,
-      }
-    },
+    mixins : [ mixin ],
     data : function() {
       return {
         width : 400,
