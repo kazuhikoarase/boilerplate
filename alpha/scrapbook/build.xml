@@ -1,0 +1,9 @@
+<project default="site" basedir=".">
+  <target name="site">
+    <zip destfile="site.zip">
+      <zipfileset dir="public">
+        <include name="**/*" />
+      </zipfileset>
+    </zip>
+  </target>
+</project>
