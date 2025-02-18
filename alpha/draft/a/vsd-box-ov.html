@@ -9,6 +9,9 @@
   width: 60px;
   text-align: right;
 }
+.sld {
+  width : 200px;
+}
   </style>
 </head>
 <body>
@@ -20,14 +23,39 @@
 
   <!-- // boards[0] // -->
   <svg :width="boards[0].width" :height="boards[0].height">
-    <rect x="0" y="0" :width="boards[0].width" :height="boards[0].height" fill="#f0f0f0" stroke="none" />
+    <rect x="0" y="0" :width="boards[0].width" :height="boards[0].height" v-bind="styles.background" />
     <g v-mat4="mat4().translate({x: boards[0].width / 2, y: boards[0].height / 2})" v-tran4>
 
       <rect :x="-boards[0].bw / 2 - boards[0].bd * 3" :y="-boards[0].bh / 2 - boards[0].bd * 2"
         :width="(+boards[0].bw) + boards[0].bd * 6" :height="(+boards[0].bh) + boards[0].bd * 4"
-        fill="none" stroke="#000" stroke-width="2" />
+        fill="none" stroke="#000" stroke-width="0.5" />
 
-      <g fill="none" stroke="#00f" stroke-width="2">
+      <g v-bind="styles.cz">
+        <rect :x="-boards[0].bw / 2" :y="-boards[0].bh / 2"
+          :width="boards[0].bw" :height="boards[0].bh" />
+      </g>
+      <g v-bind="styles.cy">
+        <rect :x="-boards[0].bw / 2" :y="-boards[0].bh / 2 - boards[0].bd"
+          :width="boards[0].bw" :height="boards[0].bd" />
+        <rect :x="-boards[0].bw / 2" :y="-boards[0].bh / 2 - boards[0].bd * 2"
+          :width="boards[0].bw" :height="boards[0].bd" />
+        <rect :x="-boards[0].bw / 2" :y="boards[0].bh / 2"
+          :width="boards[0].bw" :height="boards[0].bd" />
+        <rect :x="-boards[0].bw / 2" :y="boards[0].bh / 2 + (+boards[0].bd)"
+          :width="boards[0].bw" :height="boards[0].bd" />
+      </g>
+      <g v-bind="styles.cx">
+        <rect :x="-boards[0].bw / 2 - boards[0].bd" :y="-boards[0].bh / 2"
+          :width="boards[0].bd" :height="boards[0].bh" />
+        <rect :x="-boards[0].bw / 2 - boards[0].bd * 2" :y="-boards[0].bh / 2"
+          :width="boards[0].bd" :height="boards[0].bh" />
+        <rect :x="boards[0].bw / 2" :y="-boards[0].bh / 2"
+          :width="boards[0].bd" :height="boards[0].bh" />
+        <rect :x="boards[0].bw / 2 + (+boards[0].bd)" :y="-boards[0].bh / 2"
+          :width="boards[0].bd" :height="boards[0].bh" />
+      </g>
+
+      <g v-bind="styles.border">
         <rect :x="-boards[0].bw / 2" :y="-boards[0].bh / 2"
           :width="boards[0].bw" :height="boards[0].bh" />
         <rect :x="-boards[0].bw / 2" :y="-boards[0].bh / 2 - boards[0].bd"
@@ -48,60 +76,102 @@
           :width="boards[0].bd" :height="boards[0].bh" />
       </g>
 
-      <g fill="none" stroke="#f00" stroke-width="1">
-        <path :d="`M${-boards[0].bw / 2 - boards[0].bd} ${-boards[0].bh / 2 - boards[0].bd * 2}
-                   L${-boards[0].bw / 2 - boards[0].bd} ${(+boards[0].bh / 2) + boards[0].bd * 2}`" />
-        <path :d="`M${-boards[0].bw / 2 - boards[0].bd * 2} ${-boards[0].bh / 2 - boards[0].bd * 2}
-                   L${-boards[0].bw / 2 - boards[0].bd * 2} ${(+boards[0].bh / 2) + boards[0].bd * 2}`" />
-        <path :d="`M${boards[0].bw / 2 + (+boards[0].bd)} ${-boards[0].bh / 2 - boards[0].bd * 2}
-                   L${boards[0].bw / 2 + (+boards[0].bd)} ${(+boards[0].bh / 2) + boards[0].bd * 2}`" />
-        <path :d="`M${boards[0].bw / 2 + boards[0].bd * 2} ${-boards[0].bh / 2 - boards[0].bd * 2}
-                   L${boards[0].bw / 2 + boards[0].bd * 2} ${(+boards[0].bh / 2) + boards[0].bd * 2}`" />
+      <g fill="none" v-bind="styles.valley">
+        <g>
+          <path :d="`M${-boards[0].bw / 2 - boards[0].bd} ${-boards[0].bh / 2 - boards[0].bd * 2}
+                     L${-boards[0].bw / 2 - boards[0].bd} ${(+boards[0].bh / 2) + boards[0].bd * 2}`" />
+          <path :d="`M${-boards[0].bw / 2 - boards[0].bd * 2} ${-boards[0].bh / 2 - boards[0].bd * 2}
+                     L${-boards[0].bw / 2 - boards[0].bd * 2} ${(+boards[0].bh / 2) + boards[0].bd * 2}`" />
+          <path :d="`M${boards[0].bw / 2 + (+boards[0].bd)} ${-boards[0].bh / 2 - boards[0].bd * 2}
+                     L${boards[0].bw / 2 + (+boards[0].bd)} ${(+boards[0].bh / 2) + boards[0].bd * 2}`" />
+          <path :d="`M${boards[0].bw / 2 + boards[0].bd * 2} ${-boards[0].bh / 2 - boards[0].bd * 2}
+                     L${boards[0].bw / 2 + boards[0].bd * 2} ${(+boards[0].bh / 2) + boards[0].bd * 2}`" />
+        </g>
+        <g>
+          <path :d="`M${-boards[0].bw / 2 - boards[0].bd * 3} ${-boards[0].bh / 2}
+                     L${boards[0].bw / 2 + boards[0].bd * 3} ${-boards[0].bh / 2}`" />
+          <path :d="`M${-boards[0].bw / 2 - boards[0].bd * 3} ${-boards[0].bh / 2 - boards[0].bd}
+                     L${boards[0].bw / 2 + boards[0].bd * 3} ${-boards[0].bh / 2 - boards[0].bd}`" />
+          <path :d="`M${-boards[0].bw / 2 - boards[0].bd * 3} ${boards[0].bh / 2}
+                     L${boards[0].bw / 2 + boards[0].bd * 3} ${boards[0].bh / 2}`" />
+          <path :d="`M${-boards[0].bw / 2 - boards[0].bd * 3} ${boards[0].bh / 2 + (+boards[0].bd)}
+                     L${boards[0].bw / 2 + boards[0].bd * 3} ${boards[0].bh / 2 + (+boards[0].bd)}`" />
+        </g>
       </g>
 
-      <g fill="none" stroke="#0f0" stroke-width="1">
-        <path :d="`M${-boards[0].bw / 2 - boards[0].bd * 3} ${-boards[0].bh / 2}
-                   L${boards[0].bw / 2 + boards[0].bd * 3} ${-boards[0].bh / 2}`" />
-        <path :d="`M${-boards[0].bw / 2 - boards[0].bd * 3} ${-boards[0].bh / 2 - boards[0].bd}
-                   L${boards[0].bw / 2 + boards[0].bd * 3} ${-boards[0].bh / 2 - boards[0].bd}`" />
-        <path :d="`M${-boards[0].bw / 2 - boards[0].bd * 3} ${boards[0].bh / 2}
-                   L${boards[0].bw / 2 + boards[0].bd * 3} ${boards[0].bh / 2}`" />
-        <path :d="`M${-boards[0].bw / 2 - boards[0].bd * 3} ${boards[0].bh / 2 + (+boards[0].bd)}
-                   L${boards[0].bw / 2 + boards[0].bd * 3} ${boards[0].bh / 2 + (+boards[0].bd)}`" />
-      </g>
     </g>
   </svg>
   <div>
+    <span><label>Paper Size: {{(+boards[0].bw) + boards[0].bd * 6}}
+      x
+      {{(+boards[0].bh) + boards[0].bd * 4}}
+      {{boards[0].unit}}</label></span>
+  </div>
+  <div>
     <div><label><span class="ttl">Width:</span>
-      <input type="range" min="10" max="500" step="5" v-model="boards[0].bw" />{{boards[0].bw}}</label></div>
+      <input type="range" class="sld"
+        min="10" max="500" step="5" v-model="boards[0].bw" />{{boards[0].bw}} {{boards[0].unit}}</label></div>
     <div><label><span class="ttl">Height:</span>
-      <input type="range" min="10" max="500" step="5" v-model="boards[0].bh" />{{boards[0].bh}}</label></div>
+      <input type="range" class="sld"
+        min="10" max="500" step="5" v-model="boards[0].bh" />{{boards[0].bh}} {{boards[0].unit}}</label></div>
     <div><label><span class="ttl">Depth:</span>
-      <input type="range" min="10" max="500" step="5" v-model="boards[0].bd" />{{boards[0].bd}}</label></div>
+      <input type="range" class="sld"
+        min="10" max="100" step="1" v-model="boards[0].bd" />{{boards[0].bd}} {{boards[0].unit}}</label></div>
   </div>
 
   <!-- // boards[1] // -->
   <svg :width="boards[1].width" :height="boards[1].height">
-    <rect x="0" y="0" :width="boards[1].width" :height="boards[1].height" fill="#f0f0f0" stroke="none" />
+    <rect x="0" y="0" :width="boards[1].width" :height="boards[1].height" v-bind="styles.background" />
     <g v-mat4="mat4().translate({x: boards[1].width / 2, y: boards[1].height / 2})">
       <g v-mat4="mat4().rotateY(d2r(boards[1].p) ).rotateX(d2r(boards[1].t) )">
-        <path d="M-100 0L100 0" fill="none" stroke="#00f" v-tran4 />
-        <path d="M-100 0L100 0" fill="none" stroke="#0f0" v-mat4="mat4().rotateY(d2r(90))" v-tran4 />
-        <path d="M-100 0L100 0" fill="none" stroke="#f00" v-mat4="mat4().rotateZ(d2r(90))" v-tran4 />
-        <rect :x="-100" :y="-100" width="200" height="200" fill="#00f" stroke="#009" opacity="0.2"
-          v-mat4="mat4().rotateY (d2r(90))" v-tran4 />
-        <rect :x="-100" :y="-100" width="200" height="200" fill="#0f0" stroke="#090" opacity="0.2"
-          v-tran4 />
-        <rect :x="-100" :y="-100" width="200" height="200" fill="#f00" stroke="#900" opacity="0.2"
-          v-mat4="mat4().rotateX(d2r(90))" v-tran4 />
+<!--
+        <path d="M-100 0L100 0" v-bind="styles.cx" v-tran4 />
+        <path d="M-100 0L100 0" v-bind="styles.cy" v-mat4="mat4().rotateY(d2r(90))" v-tran4 />
+        <path d="M-100 0L100 0" v-bind="styles.cz" v-mat4="mat4().rotateZ(d2r(90))" v-tran4 />
+ -->
+
+        <g v-bind="styles.cx">
+          <rect :x="-boards[0].bh / 2" :y="-boards[0].bd / 2" :width="boards[0].bh" :height="boards[0].bd"
+            v-mat4="mat4().translateZ(-boards[0].bw / 2).rotateY (d2r(90))" v-tran4 />
+          <rect :x="-boards[0].bh / 2" :y="-boards[0].bd / 2" :width="boards[0].bh" :height="boards[0].bd"
+            v-mat4="mat4().translateZ(boards[0].bw / 2).rotateY (d2r(90))" v-tran4 />
+        </g>
+
+        <g v-bind="styles.cy">
+          <rect :x="-boards[0].bw / 2" :y="-boards[0].bd / 2" :width="boards[0].bw" :height="boards[0].bd"
+            v-mat4="mat4().translateZ(-boards[0].bh / 2)" v-tran4 />
+          <rect :x="-boards[0].bw / 2" :y="-boards[0].bd / 2" :width="boards[0].bw" :height="boards[0].bd"
+            v-mat4="mat4().translateZ(boards[0].bh / 2)" v-tran4 />
+        </g>
+
+        <g v-bind="styles.cz">
+          <rect :x="-boards[0].bw / 2" :y="-boards[0].bh / 2" :width="boards[0].bw" :height="boards[0].bh"
+            v-mat4="mat4().translateZ(-boards[0].bd / 2).rotateX(d2r(90))" v-tran4 />
+        </g>
+
+        <g v-bind="styles.border">
+          <rect :x="-boards[0].bh / 2" :y="-boards[0].bd / 2" :width="boards[0].bh" :height="boards[0].bd"
+            v-mat4="mat4().translateZ(-boards[0].bw / 2).rotateY (d2r(90))" v-tran4 />
+          <rect :x="-boards[0].bh / 2" :y="-boards[0].bd / 2" :width="boards[0].bh" :height="boards[0].bd"
+            v-mat4="mat4().translateZ(boards[0].bw / 2).rotateY (d2r(90))" v-tran4 />
+          <rect :x="-boards[0].bw / 2" :y="-boards[0].bd / 2" :width="boards[0].bw" :height="boards[0].bd"
+            v-mat4="mat4().translateZ(-boards[0].bh / 2)" v-tran4 />
+          <rect :x="-boards[0].bw / 2" :y="-boards[0].bd / 2" :width="boards[0].bw" :height="boards[0].bd"
+            v-mat4="mat4().translateZ(boards[0].bh / 2)" v-tran4 />
+          <rect :x="-boards[0].bw / 2" :y="-boards[0].bh / 2" :width="boards[0].bw" :height="boards[0].bh"
+            v-mat4="mat4().translateZ(-boards[0].bd / 2).rotateX(d2r(90))" v-tran4 />
+        </g>
+
       </g>
     </g>
   </svg>
   <div>
     <div><label><span class="ttl">Pan:</span>
-      <input type="range" min="-90" max="90" step="1" v-model="boards[1].p" />{{boards[1].p}}</label></div>
+      <input type="range" class="sld"
+        min="-90" max="90" step="1" v-model="boards[1].p" />{{boards[1].p}}</label></div>
     <div><label><span class="ttl">Tilt:</span>
-      <input type="range" min="-90" max="90" step="1" v-model="boards[1].t" />{{boards[1].t}}</label></div>
+      <input type="range" class="sld"
+        min="-90" max="90" step="1" v-model="boards[1].t" />{{boards[1].t}}</label></div>
   </div>
 </div>
 
@@ -176,19 +246,57 @@
     mixins : [ mixin ],
     data : function() {
       return {
+        styles : {
+          mountain : {
+            fill : 'none',
+            stroke : '#f96',
+            'stroke-width': '1',
+            'stroke-dasharray' :'4 1 4 4',
+          },
+          valley : {
+            fill : 'none',
+            stroke : '#3c3',
+            'stroke-width': '1',
+            'stroke-dasharray' :'4',
+          },
+          cx : {
+            fill : '#00f',
+            stroke : 'none',
+            opacity : '0.2',
+          },
+          cy : {
+            fill : '#0f0',
+            stroke : 'none',
+            opacity : '0.2',
+          },
+          cz : {
+            fill : '#f00',
+            stroke : 'none',
+            opacity : '0.2',
+          },
+          border : {
+            fill : 'none',
+            stroke : '#000',
+          },
+          background : {
+            fill : '#fefefe',
+            stroke : '#666',
+          },
+        },
         boards : [
           {
             width : 400,
             height : 300,
-            bw : 100,
+            bw : 130,
             bh : 90,
             bd : 30,
+            unit : 'mm',
           },
           {
             width : 400,
             height : 300,
             p: 30,
-            t: 10,
+            t: 25,
           },
         ]
       }
