@@ -55,7 +55,7 @@
           :width="boards[0].bd" :height="boards[0].bh" />
       </g>
 
-      <g v-bind="styles.border">
+      <g v-bind="styles.draft">
         <rect :x="-boards[0].bw / 2" :y="-boards[0].bh / 2"
           :width="boards[0].bw" :height="boards[0].bh" />
         <rect :x="-boards[0].bw / 2" :y="-boards[0].bh / 2 - boards[0].bd"
@@ -76,27 +76,105 @@
           :width="boards[0].bd" :height="boards[0].bh" />
       </g>
 
-      <g fill="none" v-bind="styles.valley">
-        <g>
-          <path :d="`M${-boards[0].bw / 2 - boards[0].bd} ${-boards[0].bh / 2 - boards[0].bd * 2}
-                     L${-boards[0].bw / 2 - boards[0].bd} ${(+boards[0].bh / 2) + boards[0].bd * 2}`" />
-          <path :d="`M${-boards[0].bw / 2 - boards[0].bd * 2} ${-boards[0].bh / 2 - boards[0].bd * 2}
-                     L${-boards[0].bw / 2 - boards[0].bd * 2} ${(+boards[0].bh / 2) + boards[0].bd * 2}`" />
-          <path :d="`M${boards[0].bw / 2 + (+boards[0].bd)} ${-boards[0].bh / 2 - boards[0].bd * 2}
-                     L${boards[0].bw / 2 + (+boards[0].bd)} ${(+boards[0].bh / 2) + boards[0].bd * 2}`" />
-          <path :d="`M${boards[0].bw / 2 + boards[0].bd * 2} ${-boards[0].bh / 2 - boards[0].bd * 2}
-                     L${boards[0].bw / 2 + boards[0].bd * 2} ${(+boards[0].bh / 2) + boards[0].bd * 2}`" />
-        </g>
-        <g>
-          <path :d="`M${-boards[0].bw / 2 - boards[0].bd * 3} ${-boards[0].bh / 2}
-                     L${boards[0].bw / 2 + boards[0].bd * 3} ${-boards[0].bh / 2}`" />
+      <g v-bind="styles.valley">
+          <path :d="`M${-boards[0].bw / 2} ${-boards[0].bh / 2}
+                     L${boards[0].bw / 2} ${-boards[0].bh / 2}`" />
+          <path :d="`M${-boards[0].bw / 2} ${boards[0].bh / 2}
+                     L${boards[0].bw / 2} ${boards[0].bh / 2}`" />
+          <path :d="`M${-boards[0].bw / 2} ${-boards[0].bh / 2 - boards[0].bd}
+                     L${-boards[0].bw / 2} ${boards[0].bh / 2 + (+boards[0].bd)}`" />
+          <path :d="`M${boards[0].bw / 2} ${-boards[0].bh / 2 - boards[0].bd}
+                     L${boards[0].bw / 2} ${boards[0].bh / 2 + (+boards[0].bd)}`" />
+
+          <path :d="`M${-boards[0].bw / 2 - boards[0].bd} ${-boards[0].bh / 2}
+                     L${-boards[0].bw / 2 - boards[0].bd} ${-boards[0].bh / 2 - boards[0].bd}`" />
+          <path :d="`M${boards[0].bw / 2 + (+boards[0].bd)} ${-boards[0].bh / 2}
+                     L${boards[0].bw / 2 + (+boards[0].bd)} ${-boards[0].bh / 2 - boards[0].bd}`" />
+          <path :d="`M${-boards[0].bw / 2 - boards[0].bd} ${boards[0].bh / 2}
+                     L${-boards[0].bw / 2 - boards[0].bd} ${boards[0].bh / 2 + (+boards[0].bd)}`" />
+          <path :d="`M${boards[0].bw / 2 + (+boards[0].bd)} ${boards[0].bh / 2}
+                     L${boards[0].bw / 2 + (+boards[0].bd)} ${boards[0].bh / 2 + (+boards[0].bd)}`" />
+
+          <path :d="`M${-boards[0].bw / 2 - boards[0].bd * 2} ${-boards[0].bh / 2}
+                     L${-boards[0].bw / 2 - boards[0].bd * 2} ${-boards[0].bh / 2 - boards[0].bd}`" />
+          <path :d="`M${boards[0].bw / 2 + boards[0].bd * 2} ${-boards[0].bh / 2}
+                     L${boards[0].bw / 2 + boards[0].bd * 2} ${-boards[0].bh / 2 - boards[0].bd}`" />
+          <path :d="`M${-boards[0].bw / 2 - boards[0].bd * 2} ${boards[0].bh / 2}
+                     L${-boards[0].bw / 2 - boards[0].bd * 2} ${boards[0].bh / 2 + (+boards[0].bd)}`" />
+          <path :d="`M${boards[0].bw / 2 + boards[0].bd * 2} ${boards[0].bh / 2}
+                     L${boards[0].bw / 2 + boards[0].bd * 2} ${boards[0].bh / 2 + (+boards[0].bd)}`" />
+
+          <path :d="`M${-boards[0].bw / 2 - boards[0].bd} ${-boards[0].bh / 2 - boards[0].bd}
+                     L${-boards[0].bw / 2} ${-boards[0].bh / 2}`" />
+          <path :d="`M${boards[0].bw / 2 + (+boards[0].bd)} ${-boards[0].bh / 2 - boards[0].bd}
+                     L${boards[0].bw / 2} ${-boards[0].bh / 2}`" />
+          <path :d="`M${-boards[0].bw / 2 - boards[0].bd} ${boards[0].bh / 2 + (+boards[0].bd)}
+                     L${-boards[0].bw / 2} ${boards[0].bh / 2}`" />
+          <path :d="`M${boards[0].bw / 2 + (+boards[0].bd)} ${boards[0].bh / 2 + (+boards[0].bd)}
+                     L${boards[0].bw / 2} ${boards[0].bh / 2}`" />
+      </g>
+
+      <g v-bind="styles.mountain">
           <path :d="`M${-boards[0].bw / 2 - boards[0].bd * 3} ${-boards[0].bh / 2 - boards[0].bd}
                      L${boards[0].bw / 2 + boards[0].bd * 3} ${-boards[0].bh / 2 - boards[0].bd}`" />
-          <path :d="`M${-boards[0].bw / 2 - boards[0].bd * 3} ${boards[0].bh / 2}
-                     L${boards[0].bw / 2 + boards[0].bd * 3} ${boards[0].bh / 2}`" />
           <path :d="`M${-boards[0].bw / 2 - boards[0].bd * 3} ${boards[0].bh / 2 + (+boards[0].bd)}
                      L${boards[0].bw / 2 + boards[0].bd * 3} ${boards[0].bh / 2 + (+boards[0].bd)}`" />
-        </g>
+
+          <path :d="`M${-boards[0].bw / 2} ${-boards[0].bh / 2}
+                     L${-boards[0].bw / 2 - boards[0].bd * 3} ${-boards[0].bh / 2}`" />
+          <path :d="`M${-boards[0].bw / 2} ${boards[0].bh / 2}
+                     L${-boards[0].bw / 2 - boards[0].bd * 3} ${boards[0].bh / 2}`" />
+
+          <path :d="`M${boards[0].bw / 2} ${-boards[0].bh / 2}
+                     L${boards[0].bw / 2 + boards[0].bd * 3} ${-boards[0].bh / 2}`" />
+          <path :d="`M${boards[0].bw / 2} ${boards[0].bh / 2}
+                     L${boards[0].bw / 2 + boards[0].bd * 3} ${boards[0].bh / 2}`" />
+
+          <path :d="`M${-boards[0].bw / 2 - boards[0].bd} ${-boards[0].bh / 2}
+                     L${-boards[0].bw / 2 - boards[0].bd} ${boards[0].bh / 2}`" />
+          <path :d="`M${boards[0].bw / 2 + (+boards[0].bd)} ${-boards[0].bh / 2}
+                     L${boards[0].bw / 2 + (+boards[0].bd)} ${boards[0].bh / 2}`" />
+          <path :d="`M${-boards[0].bw / 2 - boards[0].bd * 2} ${-boards[0].bh / 2}
+                     L${-boards[0].bw / 2 - boards[0].bd * 2} ${boards[0].bh / 2}`" />
+          <path :d="`M${boards[0].bw / 2 + boards[0].bd * 2} ${-boards[0].bh / 2}
+                     L${boards[0].bw / 2 + boards[0].bd * 2} ${boards[0].bh / 2}`" />
+
+          <path :d="`M${-boards[0].bw / 2} ${-boards[0].bh / 2 - boards[0].bd}
+                     L${-boards[0].bw / 2} ${-boards[0].bh / 2 - boards[0].bd * 2}`" />
+          <path :d="`M${boards[0].bw / 2} ${-boards[0].bh / 2 - boards[0].bd}
+                     L${boards[0].bw / 2} ${-boards[0].bh / 2 - boards[0].bd * 2}`" />
+          <path :d="`M${-boards[0].bw / 2} ${boards[0].bh / 2 + (+boards[0].bd)}
+                     L${-boards[0].bw / 2} ${boards[0].bh / 2 + boards[0].bd * 2}`" />
+          <path :d="`M${boards[0].bw / 2} ${boards[0].bh / 2 + (+boards[0].bd)}
+                     L${boards[0].bw / 2} ${boards[0].bh / 2 + boards[0].bd * 2}`" />
+
+          <path :d="`M${-boards[0].bw / 2 - boards[0].bd} ${-boards[0].bh / 2 - boards[0].bd}
+                     L${-boards[0].bw / 2 - boards[0].bd} ${-boards[0].bh / 2 - boards[0].bd * 2}`" />
+          <path :d="`M${boards[0].bw / 2 + (+boards[0].bd)} ${-boards[0].bh / 2 - boards[0].bd}
+                     L${boards[0].bw / 2 + (+boards[0].bd)} ${-boards[0].bh / 2 - boards[0].bd * 2}`" />
+          <path :d="`M${-boards[0].bw / 2 - boards[0].bd} ${boards[0].bh / 2 + (+boards[0].bd)}
+                     L${-boards[0].bw / 2 - boards[0].bd} ${boards[0].bh / 2 + boards[0].bd * 2}`" />
+          <path :d="`M${boards[0].bw / 2 + (+boards[0].bd)} ${boards[0].bh / 2 + (+boards[0].bd)}
+                     L${boards[0].bw / 2 + (+boards[0].bd)} ${boards[0].bh / 2 + boards[0].bd * 2}`" />
+
+          <path :d="`M${-boards[0].bw / 2 - boards[0].bd * 2} ${-boards[0].bh / 2 - boards[0].bd}
+                     L${-boards[0].bw / 2 - boards[0].bd * 2} ${-boards[0].bh / 2 - boards[0].bd * 2}`" />
+          <path :d="`M${boards[0].bw / 2 + boards[0].bd * 2} ${-boards[0].bh / 2 - boards[0].bd}
+                     L${boards[0].bw / 2 + boards[0].bd * 2} ${-boards[0].bh / 2 - boards[0].bd * 2}`" />
+          <path :d="`M${-boards[0].bw / 2 - boards[0].bd * 2} ${boards[0].bh / 2 + (+boards[0].bd)}
+                     L${-boards[0].bw / 2 - boards[0].bd * 2} ${boards[0].bh / 2 + boards[0].bd * 2}`" />
+          <path :d="`M${boards[0].bw / 2 + boards[0].bd * 2} ${boards[0].bh / 2 + (+boards[0].bd)}
+                     L${boards[0].bw / 2 + boards[0].bd * 2} ${boards[0].bh / 2 + boards[0].bd * 2}`" />
+
+          <path :d="`M${-boards[0].bw / 2 - boards[0].bd} ${-boards[0].bh / 2 - boards[0].bd}
+                     L${-boards[0].bw / 2} ${-boards[0].bh / 2 - boards[0].bd * 2}`" />
+          <path :d="`M${boards[0].bw / 2 + (+boards[0].bd)} ${-boards[0].bh / 2 - boards[0].bd}
+                     L${boards[0].bw / 2} ${-boards[0].bh / 2 - boards[0].bd * 2}`" />
+          <path :d="`M${-boards[0].bw / 2 - boards[0].bd} ${boards[0].bh / 2 + (+boards[0].bd)}
+                     L${-boards[0].bw / 2} ${boards[0].bh / 2 + boards[0].bd * 2}`" />
+          <path :d="`M${boards[0].bw / 2 + (+boards[0].bd)} ${boards[0].bh / 2 + (+boards[0].bd)}
+                     L${boards[0].bw / 2} ${boards[0].bh / 2 + boards[0].bd * 2}`" />
+
       </g>
 
     </g>
@@ -250,13 +328,13 @@
           mountain : {
             fill : 'none',
             stroke : '#f96',
-            'stroke-width': '1',
-            'stroke-dasharray' :'4 1 4 4',
+            'stroke-width': '2',
+            'stroke-dasharray' :'1 4 4 4',
           },
           valley : {
             fill : 'none',
             stroke : '#3c3',
-            'stroke-width': '1',
+            'stroke-width': '2',
             'stroke-dasharray' :'4',
           },
           cx : {
@@ -278,6 +356,11 @@
             fill : 'none',
             stroke : '#000',
           },
+          draft : {
+            fill : 'none',
+            stroke : '#ccc',
+            'stroke-dasharray' :'2',
+          },
           background : {
             fill : '#fefefe',
             stroke : '#666',
@@ -285,16 +368,16 @@
         },
         boards : [
           {
-            width : 400,
-            height : 300,
+            width : 480,
+            height : 270,
             bw : 130,
             bh : 90,
             bd : 30,
             unit : 'mm',
           },
           {
-            width : 400,
-            height : 300,
+            width : 480,
+            height : 270,
             p: 30,
             t: 25,
           },
