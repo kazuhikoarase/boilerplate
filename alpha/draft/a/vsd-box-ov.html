@@ -4,20 +4,33 @@
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <script src="svgtk.js" ></script>
   <style>
+
+BODY {
+  margin : 0px;
+  padding : 0px;
+  overflow : hidden;
+}
+
+#app {
+  margin : 16px;
+}
+
 .ttl {
   display: inline-block;
   width: 60px;
   text-align: right;
 }
+
 .sld {
-  width : 200px;
+  width : 360px;
 }
+
   </style>
 </head>
 <body>
 
 <div id="app">
-  <div>
+  <div style="margin-bottom: 16px;">
     <button @click="download_clickHandler"> download </button>
   </div>
 
@@ -112,6 +125,15 @@
                      L${-boards[0].bw / 2} ${boards[0].bh / 2}`" />
           <path :d="`M${boards[0].bw / 2 + (+boards[0].bd)} ${boards[0].bh / 2 + (+boards[0].bd)}
                      L${boards[0].bw / 2} ${boards[0].bh / 2}`" />
+
+          <path :d="`M${-boards[0].bw / 2 + (+boards[0].bd)} ${-boards[0].bh / 2 - boards[0].bd}
+                     L${-boards[0].bw / 2} ${-boards[0].bh / 2}`" />
+          <path :d="`M${boards[0].bw / 2 - boards[0].bd} ${-boards[0].bh / 2 - boards[0].bd}
+                     L${boards[0].bw / 2} ${-boards[0].bh / 2}`" />
+          <path :d="`M${-boards[0].bw / 2 + (+boards[0].bd)} ${boards[0].bh / 2 + (+boards[0].bd)}
+                     L${-boards[0].bw / 2} ${boards[0].bh / 2}`" />
+          <path :d="`M${boards[0].bw / 2 - boards[0].bd} ${boards[0].bh / 2 + (+boards[0].bd)}
+                     L${boards[0].bw / 2} ${boards[0].bh / 2}`" />
       </g>
 
       <g v-bind="styles.mountain">
@@ -175,26 +197,45 @@
           <path :d="`M${boards[0].bw / 2 + (+boards[0].bd)} ${boards[0].bh / 2 + (+boards[0].bd)}
                      L${boards[0].bw / 2} ${boards[0].bh / 2 + boards[0].bd * 2}`" />
 
+          <path :d="`M${-boards[0].bw / 2 + (+boards[0].bd)} ${-boards[0].bh / 2 - boards[0].bd}
+                     L${-boards[0].bw / 2} ${-boards[0].bh / 2 - boards[0].bd * 2}`" />
+          <path :d="`M${boards[0].bw / 2 - boards[0].bd} ${-boards[0].bh / 2 - boards[0].bd}
+                     L${boards[0].bw / 2} ${-boards[0].bh / 2 - boards[0].bd * 2}`" />
+          <path :d="`M${-boards[0].bw / 2 + (+boards[0].bd)} ${boards[0].bh / 2 + (+boards[0].bd)}
+                     L${-boards[0].bw / 2} ${boards[0].bh / 2 + boards[0].bd * 2}`" />
+          <path :d="`M${boards[0].bw / 2 - boards[0].bd} ${boards[0].bh / 2 + (+boards[0].bd)}
+                     L${boards[0].bw / 2} ${boards[0].bh / 2 + boards[0].bd * 2}`" />
       </g>
 
     </g>
   </svg>
   <div>
-    <span><label>Paper Size: {{(+boards[0].bw) + boards[0].bd * 6}}
-      x
-      {{(+boards[0].bh) + boards[0].bd * 4}}
-      {{boards[0].unit}}</label></span>
+    <fieldset style="display:inline-block;">
+      <legend>Paper Size</legend>
+      <div><label><span class="ttl">Width:</span>
+        <input type="range" class="sld"
+          min="10" max="300" step="1" v-model="boards[0].pw" />{{boards[0].pw}} {{boards[0].unit}}</label></div>
+      <div><label><span class="ttl">Height:</span>
+        <input type="range" class="sld"
+          min="10" max="300" step="1" v-model="boards[0].ph" />{{boards[0].ph}} {{boards[0].unit}}</label></div>
+      <div><label><span class="ttl">Depth:</span>
+        <input type="range" class="sld"
+          min="10" max="300" step="1" v-model="boards[0].pd" />{{boards[0].pd}} {{boards[0].unit}}</label></div>
+    </fieldset>
   </div>
   <div>
-    <div><label><span class="ttl">Width:</span>
-      <input type="range" class="sld"
-        min="10" max="500" step="5" v-model="boards[0].bw" />{{boards[0].bw}} {{boards[0].unit}}</label></div>
-    <div><label><span class="ttl">Height:</span>
-      <input type="range" class="sld"
-        min="10" max="500" step="5" v-model="boards[0].bh" />{{boards[0].bh}} {{boards[0].unit}}</label></div>
-    <div><label><span class="ttl">Depth:</span>
-      <input type="range" class="sld"
-        min="10" max="100" step="1" v-model="boards[0].bd" />{{boards[0].bd}} {{boards[0].unit}}</label></div>
+    <fieldset style="display:inline-block;">
+      <legend>Box Size</legend>
+      <div><label><span class="ttl">Width:</span>
+        <input type="range" class="sld"
+          min="10" max="150" step="5" v-model="boards[0].bw" />{{boards[0].bw}} {{boards[0].unit}}</label></div>
+      <div><label><span class="ttl">Height:</span>
+        <input type="range" class="sld"
+          min="10" max="150" step="5" v-model="boards[0].bh" />{{boards[0].bh}} {{boards[0].unit}}</label></div>
+      <div><label><span class="ttl">Depth:</span>
+        <input type="range" class="sld"
+          min="10" max="150" step="1" v-model="boards[0].bd" />{{boards[0].bd}} {{boards[0].unit}}</label></div>
+    </fieldset>
   </div>
 
   <!-- // boards[1] // -->
@@ -208,11 +249,26 @@
         <path d="M-100 0L100 0" v-bind="styles.cz" v-mat4="mat4().rotateZ(d2r(90))" v-tran4 />
  -->
 
-        <g v-bind="styles.cx">
-          <rect :x="-boards[0].bh / 2" :y="-boards[0].bd / 2" :width="boards[0].bh" :height="boards[0].bd"
-            v-mat4="mat4().translateZ(-boards[0].bw / 2).rotateY (d2r(90))" v-tran4 />
-          <rect :x="-boards[0].bh / 2" :y="-boards[0].bd / 2" :width="boards[0].bh" :height="boards[0].bd"
-            v-mat4="mat4().translateZ(boards[0].bw / 2).rotateY (d2r(90))" v-tran4 />
+        <g v-mat4="mat4().translateZ(-boards[0].bw / 2).rotateY (d2r(90))" v-tran4>
+          <rect v-bind="styles.cx" :x="-boards[0].bh / 2" :y="-boards[0].bd / 2"
+            :width="boards[0].bh" :height="boards[0].bd" />
+          <path v-bind="styles.foldenBorder" :d="`M${-boards[0].bh / 2} ${boards[0].bd / 2}
+            L${-(boards[0].bh / 2 - boards[0].bd)} ${-boards[0].bd / 2}
+            L${-(boards[0].bh / 2 - boards[0].bd)} ${boards[0].bd / 2}`" />
+          <path v-bind="styles.foldenBorder" :d="`M${boards[0].bh / 2} ${boards[0].bd / 2}
+            L${(boards[0].bh / 2 - boards[0].bd)} ${-boards[0].bd / 2}
+            L${(boards[0].bh / 2 - boards[0].bd)} ${boards[0].bd / 2}`" />
+        </g>
+
+        <g v-mat4="mat4().translateZ(boards[0].bw / 2).rotateY (d2r(90))" v-tran4>
+          <rect v-bind="styles.cx" :x="-boards[0].bh / 2" :y="-boards[0].bd / 2"
+            :width="boards[0].bh" :height="boards[0].bd" />
+          <path v-bind="styles.foldenBorder" :d="`M${-boards[0].bh / 2} ${boards[0].bd / 2}
+            L${-(boards[0].bh / 2 - boards[0].bd)} ${-boards[0].bd / 2}
+            L${-(boards[0].bh / 2 - boards[0].bd)} ${boards[0].bd / 2}`" />
+          <path v-bind="styles.foldenBorder" :d="`M${boards[0].bh / 2} ${boards[0].bd / 2}
+            L${(boards[0].bh / 2 - boards[0].bd)} ${-boards[0].bd / 2}
+            L${(boards[0].bh / 2 - boards[0].bd)} ${boards[0].bd / 2}`" />
         </g>
 
         <g v-bind="styles.cy">
@@ -356,6 +412,11 @@
             fill : 'none',
             stroke : '#000',
           },
+          foldenBorder : {
+            fill : 'none',
+            stroke : '#000',
+            'stroke-dasharray' :'2',
+          },
           draft : {
             fill : 'none',
             stroke : '#ccc',
@@ -370,23 +431,55 @@
           {
             width : 480,
             height : 270,
-            bw : 130,
-            bh : 90,
-            bd : 30,
+            bw : 0,
+            bh : 0,
+            bd : 0,
+            pw : 0,
+            ph : 0,
+            pd : 0,
             unit : 'mm',
           },
           {
             width : 480,
             height : 270,
-            p: 30,
-            t: 25,
+            p: 0,
+            t: 0,
           },
         ]
       }
     },
     computed : {
+      paper : function() {
+        return { w: +this.boards[0].pw, h: +this.boards[0].ph, d: +this.boards[0].pd };
+      },
+      box : function() {
+        return { w: +this.boards[0].bw, h: +this.boards[0].bh, d: +this.boards[0].bd };
+      },
+    },
+    watch : {
+      paper : function(newVal) {
+        const pw = newVal.w;
+        const ph = newVal.h;
+        const pd = newVal.d;
+        this.boards[0].bw = pw - pd * 6;
+        this.boards[0].bh = ph - pd * 4;
+        this.boards[0].bd = pd;
+      },
+      box : function(newVal) {
+        const bw = newVal.w;
+        const bh = newVal.h;
+        const bd = newVal.d;
+        this.boards[0].pw = bw + bd * 6;
+        this.boards[0].ph = bh + bd * 4;
+        this.boards[0].pd = bd;
+      }
     },
     mounted: function() {
+      this.boards[0].bw = 100;
+      this.boards[0].bh = 70;
+      this.boards[0].bd = 25;
+      this.boards[1].p = 30;
+      this.boards[1].t = 24;
     }
   }).mount('#app');
 
