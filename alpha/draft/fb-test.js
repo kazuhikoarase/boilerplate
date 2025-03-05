@@ -17,6 +17,8 @@ const app = initializeApp(firebaseConfig);
 // Initialize Realtime Database and get a reference to the service
 const database = getDatabase(app);
 
+const listPath = 'posts';
+
 createApp({
   data : function() {
     return {
@@ -26,7 +28,7 @@ createApp({
   },
   methods : {
     appendClick : function(event) {
-      const itemRef = push(ref(database, 'posts') );
+      const itemRef = push(ref(database, listPath) );
       set(itemRef, {
         time : +new Date(),
         txval : this.val,
@@ -35,21 +37,21 @@ createApp({
     valChange : function(event, item) {
       item.val.txval = event.target.value;
       const updates = {};
-      updates['posts/' + item.key] = item.val;
+      updates[listPath + '/' + item.key] = item.val;
       update(ref(database), updates);
     },
     removeClick : function(key) {
       /*
       const updates = {};
-      updates['posts/' + key] = null;
+      updates[listPath + '/' + key] = null;
       update(ref(database), updates);
       */
-      remove(ref(database, 'posts/' + key) );
+      remove(ref(database, listPath + '/' + key) );
     },
   },
   mounted : function() {
     const _this = this;
-    onValue(ref(database, 'posts'), (snapshot) => {
+    onValue(ref(database, listPath), (snapshot) => {
       const list = [];
       snapshot.forEach((childSnapshot) => {
         const childKey = childSnapshot.key;
