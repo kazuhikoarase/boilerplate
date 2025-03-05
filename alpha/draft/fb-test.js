@@ -8,9 +8,8 @@ import { firebaseConfig } from './fb-test-config.js';
 import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
 
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js';
-import { getDatabase, ref, push, set, update, remove, onValue } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js';
-
-console.log('conf', aa);
+import { getDatabase, ref, push, set, update, remove, onValue }
+    from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js';
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -18,51 +17,44 @@ const app = initializeApp(firebaseConfig);
 // Initialize Realtime Database and get a reference to the service
 const database = getDatabase(app);
 
-const listRef = ref(database, 'posts');
-
-
-
-//const itemRef = get(listRef);
-
-/*
-const listRef = ref(database,'posts');
-const itemRef = push(listRef);
-set(itemRef, {
-  time : +new Date(),
-  val : 'e',
-});
-*/
-
 createApp({
   data : function() {
     return {
-      val : 'z',
+      val : '',
       list : [],
     };
   },
   methods : {
-    testClick : function(event) {
-      console.log('test!');
-      const itemRef = push(listRef);
+    appendClick : function(event) {
+      const itemRef = push(ref(database, 'posts') );
       set(itemRef, {
         time : +new Date(),
-        val : 'e',
+        txval : this.val,
       });
     },
+    valChange : function(event, item) {
+      item.val.txval = event.target.value;
+      const updates = {};
+      updates['posts/' + item.key] = item.val;
+      update(ref(database), updates);
+    },
     removeClick : function(key) {
-      var updates = {};
+      /*
+      const updates = {};
       updates['posts/' + key] = null;
       update(ref(database), updates);
+      */
+      remove(ref(database, 'posts/' + key) );
     },
   },
   mounted : function() {
-    var _this = this;
-    onValue(listRef, (snapshot) => {
-      var list = [];
+    const _this = this;
+    onValue(ref(database, 'posts'), (snapshot) => {
+      const list = [];
       snapshot.forEach((childSnapshot) => {
         const childKey = childSnapshot.key;
         const childVal = childSnapshot.val();
-        list.push({key : childKey, val : childVal });
+        list.push({ key : childKey, val : childVal });
       });
       _this.list = list;
     });

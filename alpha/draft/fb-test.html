@@ -1,16 +1,19 @@
 <!doctype html>
 <html>
 <head>
-<script type="module" src="fb-test.js"></script>
+  <meta charset="UTF-8" />
+  <script type="module" src="fb-test.js"></script>
 </head>
 <body>
-<div id="app">
- [{{val}}]
-  <div v-for="item in list">
-    <span>{{item.key}}</span>:<span>{{item.val}}</span><button @click="removeClick(item.key)"> remove </button>
+  <div id="app">
+    <span>val:{{val}}</span>
+    <div v-for="item in list">
+      <span>{{item.key}}</span>:<span>{{item.val}}</span>
+      <input type="text" :value="item.val.txval" @change="valChange($event, item)" />
+      <button @click="removeClick(item.key)"> remove </button>
+    </div>
+    <input type="text" v-model="val" />
+    <button @click="appendClick"> append </button>
   </div>
-  <input type="text" v-model="val" />
-  <button @click="testClick"> test </button>
-</div>
 </body>
 </html>
