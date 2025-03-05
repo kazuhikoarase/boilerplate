@@ -6,7 +6,7 @@ var http = require('http');
 var fs = require('fs');
 
 var config = {
-  port: 8080,
+  port: 8086,
   baseDir: ''//'/docs'
 };
 

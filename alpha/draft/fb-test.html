@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+<head>
+<script type="module" src="fb-test.js"></script>
+</head>
+<body>
+<div id="app">
+ [{{val}}]
+  <div v-for="item in list">
+    <span>{{item.key}}</span>:<span>{{item.val}}</span><button @click="removeClick(item.key)"> remove </button>
+  </div>
+  <input type="text" v-model="val" />
+  <button @click="testClick"> test </button>
+</div>
+</body>
+</html>
