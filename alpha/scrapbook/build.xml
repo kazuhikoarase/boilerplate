@@ -1,9 +1,16 @@
 <project default="site" basedir=".">
-  <target name="site">
+  <property name="public" location="public" />
+
+  <target name="prepare">
+    <gzip src="${public}/mydoc.txt" destfile="${public}/mydoc.txt.gz" />
+  </target>
+
+  <target name="site" depends="prepare">
     <zip destfile="site.zip">
-      <zipfileset dir="public">
+      <zipfileset dir="${public}">
         <include name="**/*" />
       </zipfileset>
     </zip>
   </target>
+
 </project>

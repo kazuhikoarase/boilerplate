@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <script
+    src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+    crossorigin="anonymous"></script>
+  <script>
+$(function() {
+
+  var loadGzText = function(url, handler) {
+    var decompressData = function(blob) {
+      const ds = new DecompressionStream('gzip');
+      const decompressedStream = blob.stream().pipeThrough(ds);
+      new Response(decompressedStream).blob().then(function(data) {
+        data.text().then(function(data) {
+          handler(data);
+        }).catch(function(e) {
+          console.log(e);
+        });
+      }).catch(function(e) {
+        console.log(e);
+      });
+    };
+    const xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200){
+        decompressData(this.response);
+      }
+    };
+    xhr.open('GET', url);
+    xhr.responseType = 'blob';
+    xhr.send();
+  };
+
+  $('#test').on('click', function() {
+    loadGzText('mydoc.txt.gz', function(data) {
+      $('#gztext').val(data);
+    });
+  });
+});
+  </script>
+  <style>
+#gztext {
+  width : 250px;
+  height : 150px;
+}
+  </style>
+</head>
+<body>
+  <button id="test"> test </button>
+  <br/>
+  <textarea id="gztext"></textarea>
+</body>
+</html>
