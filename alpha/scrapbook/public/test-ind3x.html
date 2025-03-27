@@ -1,11 +1,39 @@
 <!doctype html>
 <html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://www.unpkg.com/qrcode-generator@1.4.4/qrcode.js"></script>
+  <script
+    src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+    crossorigin="anonymous"></script>
+  <script>
+$(function() {
+  const url = location.href;
+  const qr = qrcode(0, 'L');
+  qr.addData(url);
+  qr.make();
+  $('#qr').attr('src', qr.createDataURL() );
+  $('#qr-alt').text(url);
+});
+  </script>
+  <style>
+#qr-box {
+  text-align : center;
+}
+  </style>
+  <title>| test-ind3x |</title>
+</head>
 <body>
-
-<ul>
-  <li><a href="vsd0.html">vsd0</a></li>
-  <li><a href="gztest.html">gztest</a></li>
-</ul>
-
+  <ul>
+    <li><a href="vsd0.html">vsd0</a></li>
+    <li><a href="gztest.html">gztest</a></li>
+  </ul>
+  <div id="qr-box">
+    <img id="qr" />
+    <br/>
+    <label id="qr-alt"></label>
+  </div>
 </body>
 </html>

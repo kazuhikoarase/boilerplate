@@ -1,16 +1,23 @@
-<project default="site" basedir=".">
+<project default="deploy" basedir=".">
+
   <property name="public" location="public" />
+  <property name="target" value="site.zip" />
+  <property name="docs" location="../../docs" />
 
   <target name="prepare">
     <gzip src="${public}/mydoc.txt" destfile="${public}/mydoc.txt.gz" />
   </target>
 
   <target name="site" depends="prepare">
-    <zip destfile="site.zip">
+    <zip destfile="${target}">
       <zipfileset dir="${public}">
         <include name="**/*" />
       </zipfileset>
     </zip>
+  </target>
+
+  <target name="deploy" depends="site">
+    <unzip dest="${docs}/scrapbook" src="${target}" />
   </target>
 
 </project>
