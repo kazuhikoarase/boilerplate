@@ -2,24 +2,32 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.zip.CRC32;
 
 import pnglib.PNGConstants;
+import pnglib.PNGData;
 import pnglib.PNGInputStream;
 
+/**
+ * ParsePNG
+ * @see https://www.w3.org/TR/png-3/
+ */
 public class ParsePNG {
 
   public static void main(final String[] args) throws Exception {
 
 //    final String file = "img.png";
     final String file = "anim.png";
+
     final PNGInputStream in = new PNGInputStream(new BufferedInputStream(new FileInputStream(file) ) );
 
     try {
 
-      final String sig = in.readString(8);
-      if (!sig.equals(PNGConstants.PNG_SIGNATURE) ) {
-        throw new IOException(sig);
+      final String signature = in.readString(8);
+      if (!signature.equals(PNGConstants.PNG_SIGNATURE) ) {
+        throw new IOException(signature);
       }
 
       new ParsePNG().parse(in);
@@ -30,6 +38,9 @@ public class ParsePNG {
   }
 
   public void parse(final PNGInputStream in) throws Exception {
+
+    final long[] size = {0, 0};
+
     while (true) {
 
       final long len = in.readU4();
@@ -41,7 +52,7 @@ public class ParsePNG {
       final byte[] data = in.readBytes(len);
 
       final CRC32 crc32 = new CRC32();
-      crc32.update(type.getBytes(PNGConstants.US_ASCII) );
+      crc32.update(type.getBytes(PNGConstants.LATIN_1) );
       crc32.update(data);
       final long crcLocal = crc32.getValue();
 
@@ -52,74 +63,78 @@ public class ParsePNG {
 
       if (PNGConstants.IHDR.equals(type) ) {
 
-        /*
-         * Width 4 bytes
-         * Height  4 bytes
-         * Bit depth 1 byte
-         * Color type  1 byte
-         * Compression method  1 byte
-         * Filter method 1 byte
-         * Interlace method  1 byte
-         */
+        final PNGInputStream subIn = new PNGInputStream(new ByteArrayInputStream(data) );
+        try {
+
+          /*
+           * Width 4 bytes
+           * Height  4 bytes
+           * Bit depth 1 byte
+           * Color type  1 byte
+           * Compression method  1 byte
+           * Filter method 1 byte
+           * Interlace method  1 byte
+           */
+          final Map<String,Object> chunk = new LinkedHashMap<>();
+          chunk.put("width", size[0] = subIn.readU4() );
+          chunk.put("height", size[1] = subIn.readU4() );
+          chunk.put("bit_depth", subIn.readU1() );
+          chunk.put("color_type", subIn.readU1() );
+          chunk.put("compression_method", subIn.readU1() );
+          chunk.put("filter_method", subIn.readU1() );
+          chunk.put("interlace_method", subIn.readU1() );
+
+          System.out.println(chunk);
+
+        } finally {
+          subIn.close();
+        }
+      } else if (PNGConstants.acTL.equals(type) ) {
 
         final PNGInputStream subIn = new PNGInputStream(new ByteArrayInputStream(data) );
         try {
 
-          final long width = subIn.readU4();
-          final long height = subIn.readU4();
-          final int bit_depth = subIn.readU1();
-          final int color_type = subIn.readU1();
-          final int compression_method = subIn.readU1();
-          final int filter_method = subIn.readU1();
-          final int interlace_method = subIn.readU1();
+          /*
+           * num_frames  4 bytes
+           * num_plays 4 bytes
+           */
+          final Map<String,Object> chunk = new LinkedHashMap<>();
+          chunk.put("num_frames", subIn.readU4() );
+          chunk.put("num_plays", subIn.readU4() );
 
-          System.out.println(String.format("  width              : %d", width) );
-          System.out.println(String.format("  height             : %d", height) );
-          System.out.println(String.format("  bit_depth          : %d", bit_depth) );
-          System.out.println(String.format("  color_type         : %d", color_type) );
-          System.out.println(String.format("  compression_method : %d", compression_method) );
-          System.out.println(String.format("  filter_method      : %d", filter_method) );
-          System.out.println(String.format("  interlace_method   : %d", interlace_method) );
+          System.out.println(chunk);
 
         } finally {
           subIn.close();
         }
       } else if (PNGConstants.fcTL.equals(type) ) {
 
-        /*
-         * sequence_number  4 bytes
-         * width 4 bytes
-         * height  4 bytes
-         * x_offset  4 bytes
-         * y_offset  4 bytes
-         * delay_num 2 bytes
-         * delay_den 2 bytes
-         * dispose_op  1 byte
-         * blend_op  1 byte
-         */
-
         final PNGInputStream subIn = new PNGInputStream(new ByteArrayInputStream(data) );
         try {
 
-          final long sequence_number = subIn.readU4();
-          final long width = subIn.readU4();
-          final long height = subIn.readU4();
-          final long x_offset = subIn.readU4();
-          final long y_offset = subIn.readU4();
-          final int delay_num = subIn.readU2();
-          final int delay_den = subIn.readU2();
-          final int dispose_op = subIn.readU1();
-          final int blend_op = subIn.readU1();
+          /*
+           * sequence_number  4 bytes
+           * width 4 bytes
+           * height  4 bytes
+           * x_offset  4 bytes
+           * y_offset  4 bytes
+           * delay_num 2 bytes
+           * delay_den 2 bytes
+           * dispose_op  1 byte
+           * blend_op  1 byte
+           */
+          final Map<String,Object> chunk = new LinkedHashMap<>();
+          chunk.put("sequence_number", subIn.readU4() );
+          chunk.put("width", size[0] = subIn.readU4() );
+          chunk.put("height", size[1] = subIn.readU4() );
+          chunk.put("x_offset", subIn.readU4() );
+          chunk.put("y_offset", subIn.readU4() );
+          chunk.put("delay_num", subIn.readU2() );
+          chunk.put("delay_den", subIn.readU2() );
+          chunk.put("dispose_op", subIn.readU1() );
+          chunk.put("blend_op", subIn.readU1() );
 
-          System.out.println(String.format("  sequence_number : %d", sequence_number) );
-          System.out.println(String.format("  width           : %d", width) );
-          System.out.println(String.format("  height          : %d", height) );
-          System.out.println(String.format("  x_offset        : %d", x_offset) );
-          System.out.println(String.format("  y_offset        : %d", y_offset) );
-          System.out.println(String.format("  delay_num       : %d", delay_num) );
-          System.out.println(String.format("  delay_den       : %d", delay_den) );
-          System.out.println(String.format("  dispose_op      : %d", dispose_op) );
-          System.out.println(String.format("  blend_op        : %d", blend_op) );
+          System.out.println(chunk);
 
         } finally {
           subIn.close();
@@ -127,21 +142,34 @@ public class ParsePNG {
       } else if (PNGConstants.IDAT.equals(type) ) {
         final PNGInputStream subIn = new PNGInputStream(new ByteArrayInputStream(data) );
         try {
-          System.out.println(String.format("             " +
-              " - %02x %02x %02x %02x %02x %02x %02x %02x",
-              subIn.readU1(), subIn.readU1(), subIn.readU1(), subIn.readU1(),
-              subIn.readU1(), subIn.readU1(), subIn.readU1(), subIn.readU1() ) );
+          final Map<String,Object> chunk = new LinkedHashMap<>();
+          chunk.put("data", new PNGData(subIn.readBytes(len), size) );
+          System.out.println(chunk);
         } finally {
           subIn.close();
         }
       } else if (PNGConstants.fdAT.equals(type) ) {
         final PNGInputStream subIn = new PNGInputStream(new ByteArrayInputStream(data) );
         try {
-          System.out.println(String.format("  %02x %02x %02x %02x" +
-              " - %02x %02x %02x %02x %02x %02x %02x %02x",
-              subIn.readU1(), subIn.readU1(), subIn.readU1(), subIn.readU1(),
-              subIn.readU1(), subIn.readU1(), subIn.readU1(), subIn.readU1(),
-              subIn.readU1(), subIn.readU1(), subIn.readU1(), subIn.readU1() ) );
+          final Map<String,Object> chunk = new LinkedHashMap<>();
+          chunk.put("sequence_number", subIn.readU4() );
+          chunk.put("data", new PNGData(subIn.readBytes(len - 4), size) );
+          System.out.println(chunk);
+        } finally {
+          subIn.close();
+        }
+      } else if (PNGConstants.tEXt.equals(type) ) {
+
+        final PNGInputStream subIn = new PNGInputStream(new ByteArrayInputStream(data) );
+        try {
+
+          final String[] kt = subIn.readString(len).split("\u0000");
+
+          final Map<String,Object> chunk = new LinkedHashMap<>();
+          chunk.put("keyword", kt[0]);
+          chunk.put("text", kt[1]);
+          System.out.println(chunk);
+
         } finally {
           subIn.close();
         }
@@ -150,5 +178,7 @@ public class ParsePNG {
       }
     }
   }
+
+  
 
 }

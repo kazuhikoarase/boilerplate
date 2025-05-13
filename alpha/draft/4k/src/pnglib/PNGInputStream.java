@@ -42,6 +42,6 @@ public class PNGInputStream extends FilterInputStream {
   }
 
   public String readString(final long len) throws IOException {
-    return new String(readBytes(len), PNGConstants.US_ASCII);
+    return new String(readBytes(len), PNGConstants.LATIN_1);
   }
 }

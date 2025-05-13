@@ -9,11 +9,13 @@ public interface PNGConstants {
   String eXIf = "eXIf";
   String sRGB = "sRGB";
   String sBIT = "sBIT";
+  String acTL = "acTL";
   String IDAT = "IDAT";
+  String tEXt = "tEXt";
   String IEND = "IEND";
 
   String fcTL = "fcTL";
   String fdAT = "fdAT";
 
-  String US_ASCII = "ISO-8859-1";
+  String LATIN_1 = "ISO-8859-1";
 }
