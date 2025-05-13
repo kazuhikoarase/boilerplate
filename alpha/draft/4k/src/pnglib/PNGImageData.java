@@ -5,12 +5,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.InflaterInputStream;
 
-public class PNGData {
+public class PNGImageData {
 
   private final byte[] data;
   private final long[] size;
 
-  public PNGData(final byte[] data, final long[] size) throws IOException {
+  public PNGImageData(final byte[] data, final long[] size) throws IOException {
     this.data = inflate(data);
     this.size = size;
   }

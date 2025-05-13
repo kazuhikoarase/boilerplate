@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.zip.CRC32;
 
 import pnglib.PNGConstants;
-import pnglib.PNGData;
+import pnglib.PNGImageData;
 import pnglib.PNGInputStream;
 
 /**
@@ -143,7 +143,7 @@ public class ParsePNG {
         final PNGInputStream subIn = new PNGInputStream(new ByteArrayInputStream(data) );
         try {
           final Map<String,Object> chunk = new LinkedHashMap<>();
-          chunk.put("data", new PNGData(subIn.readBytes(len), size) );
+          chunk.put("data", new PNGImageData(subIn.readBytes(len), size) );
           System.out.println(chunk);
         } finally {
           subIn.close();
@@ -153,7 +153,7 @@ public class ParsePNG {
         try {
           final Map<String,Object> chunk = new LinkedHashMap<>();
           chunk.put("sequence_number", subIn.readU4() );
-          chunk.put("data", new PNGData(subIn.readBytes(len - 4), size) );
+          chunk.put("data", new PNGImageData(subIn.readBytes(len - 4), size) );
           System.out.println(chunk);
         } finally {
           subIn.close();
