@@ -8,34 +8,36 @@ import java.util.zip.InflaterInputStream;
 public class PNGImageData {
 
   private final byte[] data;
-  private final long[] size;
+  private final long width;
+  private final long height;
+  private final int colorType;
 
-  public PNGImageData(final byte[] data, final long[] size) throws IOException {
+  public PNGImageData(final byte[] data,
+      final long width, final long height, final int colorType) throws IOException {
     this.data = inflate(data);
-    this.size = size;
+    this.width = width;
+    this.height = height;
+    this.colorType = colorType;
   }
-
-  private static final String HEX = "0123456789abcdef";
 
   @Override
   public String toString() {
-    final long width = size[0];
-    final long height = size[1];
-    final StringBuilder buf = new StringBuilder();
-    final int len = Math.min(16, data.length);
-    for (int i = 0; i < len; i += 1) {
-      buf.append(HEX.charAt((data[i] >>> 4) & 0xf) );
-      buf.append(HEX.charAt(data[i] & 0xf) );
-      buf.append(' ');
-/*
-      int b = data[i] & 0xff;
-      if (0x20 < b && b <= 0x7e) {
-        buf.append( (char)b);
-      } else {
-        buf.append('.');
-      }
-      */
+
+    final int colorDepth;
+    if (colorType == 2) {
+      colorDepth = 3;
+    } else if (colorType == 6) {
+      colorDepth = 4;
+    } else {
+      throw new RuntimeException("colorType:" + colorType);
     }
+
+    if (width * height * colorDepth + height != data.length) {
+      throw new RuntimeException(String.format("%d != %d", width * height * colorDepth + height, data.length) );
+    }
+
+    final StringBuilder buf = new StringBuilder();
+    PNGData.appendHexDump(buf, data);
     buf.append('(');
     buf.append(data.length);
     buf.append(',');
@@ -43,9 +45,9 @@ public class PNGImageData {
     buf.append('x');
     buf.append(height);
     buf.append(',');
-    buf.append(width * height * 4);
+    buf.append(width * height * colorDepth);
     buf.append(',');
-    buf.append(data.length - width * height * 4);
+    buf.append(data.length - width * height * colorDepth);
     buf.append(')');
     return buf.toString();
   }

@@ -1,5 +1,6 @@
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -7,6 +8,7 @@ import java.util.Map;
 import java.util.zip.CRC32;
 
 import pnglib.PNGConstants;
+import pnglib.PNGData;
 import pnglib.PNGImageData;
 import pnglib.PNGInputStream;
 
@@ -17,7 +19,21 @@ import pnglib.PNGInputStream;
 public class ParsePNG {
 
   public static void main(final String[] args) throws Exception {
+/*
+ * 
+PNG image type  Color type
+Greyscale 0
+Truecolor 2
+Indexed-color 3
+Greyscale with alpha  4
+Truecolor with alpha  6
 
+IHDR(13)
+{width=720, height=1612, bit_depth=8, color_type=2, compression_method=0, filter_method=0, interlace_method=0}
+
+IHDR(13)
+{width=480, height=400, bit_depth=8, color_type=6, compression_method=0, filter_method=0, interlace_method=0}
+ */
 //    final String file = "img.png";
     final String file = "anim.png";
 
@@ -39,16 +55,16 @@ public class ParsePNG {
 
   public void parse(final PNGInputStream in) throws Exception {
 
-    final long[] size = {0, 0};
+    long width = 0;
+    long height = 0;
+    int colorType = 0;
+
+    ByteArrayOutputStream idat = null;
 
     while (true) {
 
       final long len = in.readU4();
       final String type = in.readString(4);
-
-      System.out.printf("%s(%d)", type, len);
-      System.out.println();
-
       final byte[] data = in.readBytes(len);
 
       final CRC32 crc32 = new CRC32();
@@ -58,8 +74,26 @@ public class ParsePNG {
 
       final long crc = in.readU4();
       if (crcLocal != crc) {
-        throw new IOException(String.format("%08x %08x", crc, crcLocal) );
+        throw new RuntimeException(crc + " != " + crcLocal);
       }
+
+      if (PNGConstants.IDAT.equals(type) ) {
+        if (idat == null) {
+          idat = new ByteArrayOutputStream();
+        }
+        idat.write(data);
+      } else {
+        if (idat != null) {
+          idat.close();
+          final Map<String,Object> chunk = new LinkedHashMap<>();
+          chunk.put("data", new PNGImageData(idat.toByteArray(), width, height, colorType) );
+          System.out.println(chunk);
+          idat = null;
+        }
+      }
+
+      System.out.printf("%s(%d)", type, len);
+      System.out.println();
 
       if (PNGConstants.IHDR.equals(type) ) {
 
@@ -76,13 +110,13 @@ public class ParsePNG {
            * Interlace method  1 byte
            */
           final Map<String,Object> chunk = new LinkedHashMap<>();
-          chunk.put("width", size[0] = subIn.readU4() );
-          chunk.put("height", size[1] = subIn.readU4() );
-          chunk.put("bit_depth", subIn.readU1() );
-          chunk.put("color_type", subIn.readU1() );
-          chunk.put("compression_method", subIn.readU1() );
-          chunk.put("filter_method", subIn.readU1() );
-          chunk.put("interlace_method", subIn.readU1() );
+          chunk.put("width", width = subIn.readU4() );
+          chunk.put("height", height = subIn.readU4() );
+          chunk.put("bit_depth", verify(8, subIn.readU1() ) );
+          chunk.put("color_type", colorType = subIn.readU1() );
+          chunk.put("compression_method", verify(0, subIn.readU1() ) );
+          chunk.put("filter_method", verify(0, subIn.readU1() ) );
+          chunk.put("interlace_method", verify(0, subIn.readU1() ) );
 
           System.out.println(chunk);
 
@@ -123,37 +157,50 @@ public class ParsePNG {
            * dispose_op  1 byte
            * blend_op  1 byte
            */
+
+          /*
+           * Valid values for dispose_op are:
+           * 0 APNG_DISPOSE_OP_NONE
+           * 1 APNG_DISPOSE_OP_BACKGROUND
+           * 2 APNG_DISPOSE_OP_PREVIOUS
+           *
+           * Valid values for blend_op are:
+           * 0 APNG_BLEND_OP_SOURCE
+           * 1 APNG_BLEND_OP_OVER
+           */
+
           final Map<String,Object> chunk = new LinkedHashMap<>();
           chunk.put("sequence_number", subIn.readU4() );
-          chunk.put("width", size[0] = subIn.readU4() );
-          chunk.put("height", size[1] = subIn.readU4() );
+          chunk.put("width", width = subIn.readU4() );
+          chunk.put("height", height = subIn.readU4() );
           chunk.put("x_offset", subIn.readU4() );
           chunk.put("y_offset", subIn.readU4() );
           chunk.put("delay_num", subIn.readU2() );
           chunk.put("delay_den", subIn.readU2() );
           chunk.put("dispose_op", subIn.readU1() );
           chunk.put("blend_op", subIn.readU1() );
-
           System.out.println(chunk);
 
         } finally {
           subIn.close();
         }
+        /*
       } else if (PNGConstants.IDAT.equals(type) ) {
         final PNGInputStream subIn = new PNGInputStream(new ByteArrayInputStream(data) );
         try {
           final Map<String,Object> chunk = new LinkedHashMap<>();
-          chunk.put("data", new PNGImageData(subIn.readBytes(len), size) );
+          chunk.put("data", new PNGData(subIn.readBytes(len) ) );
           System.out.println(chunk);
         } finally {
           subIn.close();
         }
+        */
       } else if (PNGConstants.fdAT.equals(type) ) {
         final PNGInputStream subIn = new PNGInputStream(new ByteArrayInputStream(data) );
         try {
           final Map<String,Object> chunk = new LinkedHashMap<>();
           chunk.put("sequence_number", subIn.readU4() );
-          chunk.put("data", new PNGImageData(subIn.readBytes(len - 4), size) );
+          chunk.put("data", new PNGImageData(subIn.readBytes(len - 4), width, height, colorType) );
           System.out.println(chunk);
         } finally {
           subIn.close();
@@ -175,10 +222,20 @@ public class ParsePNG {
         }
       } else if (PNGConstants.IEND.equals(type) ) {
         break;
+      } else if (PNGConstants.IDAT.equals(type) ) {
+        // nothing.
+      } else {
+        final Map<String,Object> chunk = new LinkedHashMap<>();
+        chunk.put("data", new PNGData(data) );
+        System.out.println(chunk);
       }
     }
   }
 
-  
-
+  protected static <T> T verify(final T expected, final T actual) {
+    if (!expected.equals(actual) ) {
+      throw new RuntimeException(expected + " != " + actual);
+    }
+    return actual;
+  }
 }
