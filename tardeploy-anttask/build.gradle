@@ -2,7 +2,7 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
-sourceCompatibility = 1.6
+sourceCompatibility = 1.8
 
 compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
@@ -13,20 +13,12 @@ eclipse {
   }
 }
 
-uploadArchives {
-  repositories {
-    flatDir {
-      dirs 'repos'
-    }
-  }
-}
-
 repositories {
   mavenCentral()
 }
 
 dependencies {
-  compile 'javax.servlet:javax.servlet-api:3.0.1'
-  compile 'org.apache.ant:ant:1.8.4'
-  testCompile 'junit:junit:4.12'
+  implementation 'javax.servlet:javax.servlet-api:3.0.1'
+  implementation 'org.apache.ant:ant:1.8.4'
+  testImplementation 'junit:junit:4.12'
 }
