@@ -8,7 +8,7 @@ btn_up = 5
 btn_down = 26
 btn_left = 19
 btn_right = 6
-btn_key1 = 21                  
+btn_key1 = 21
 btn_key2 = 20
 
 # Up, Down, left, right, Button
