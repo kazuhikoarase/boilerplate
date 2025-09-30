@@ -52,15 +52,17 @@ dev = device.st7789(spi, rotate=0, width=240, height=240, spi_max_speed=80000000
 
 width = dev.width
 height = dev.height
-center_x = width // 2
-center_y = height // 2
+cx = width // 2
+cy = height // 2
 
-with render.canvas(dev) as draw:
+print(f"color mode:{dev.mode}")
+
+with render.canvas(dev) as draw :
     # draw.rectangle((x1, y1, x2, y2), fill='color')
     draw.rectangle(dev.bounding_box, fill="black")
     # draw.point((x, y), fill='color')
-    draw.point((center_x, center_y), fill="white")
-    draw.point((center_x + 1, center_y + 1), fill="blue")
+    draw.point((cx, cy), fill="white")
+    draw.point((cx + 1, cy + 1), fill="blue")
 
 print("go into infinity loop.")
 
