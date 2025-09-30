@@ -50,7 +50,6 @@
       host="${host}" username="${user}" password="${pass}"
       command="tar
         --exclude=*/node_modules
-        --exclude=*/WiringPi
         -cvzf ${tarfile} work"
       resultproperty="result" outputproperty="out"
       />
