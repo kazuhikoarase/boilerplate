@@ -5,6 +5,7 @@ import websockets.server as websocket_server
 import fastapi
 import fastapi.staticfiles as staticfiles
 import uvicorn
+import json
 
 # pip3 install websockets
 # pip3 install FastAPI
@@ -40,7 +41,10 @@ async def start_http_server():
 async def websocket_server_handler(websocket, path):
     async for message in websocket:
         print(f"Received: {message}")
-        await websocket.send(f"Echo: {message}") # echo back to client.
+        parsed = json.loads(message)
+        print(f"  action:{parsed['action']}")
+        #json.dumps(
+        await websocket.send(message) # echo back to client.
 
 async def start_websocket_server():
     print(f"starting websocket_server at port {websocket_port} ...")

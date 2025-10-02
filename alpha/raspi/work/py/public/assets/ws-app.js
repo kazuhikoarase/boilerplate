@@ -51,7 +51,7 @@ const createWsApp = function(opts) {
   };
 
   let alive = false;
-  const ws = initWS();
+  let ws = initWS();
 /*
   const ajax = function(opts) {
 

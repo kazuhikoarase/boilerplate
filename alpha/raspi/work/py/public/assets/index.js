@@ -9,8 +9,8 @@ Vue.createApp({
       url : 'ws://172.31.255.1:8765',
       login : { action:'puke', login : 'puke' },
     });
-    wsapp.actions.aaa = function() {
-      
+    wsapp.actions.puke = function(data) {
+      console.log('hi,', data);
     };
     //wsapp.send({ action:'puke'});
 
