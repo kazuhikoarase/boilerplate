@@ -1,11 +1,10 @@
 import pathlib
+import json
 import asyncio
-import websockets.server as websocket_server
-#from websockets.server import serve
 import fastapi
 import fastapi.staticfiles as staticfiles
 import uvicorn
-import json
+import websockets.server as websocket_server
 
 # pip3 install websockets
 # pip3 install FastAPI
@@ -39,12 +38,26 @@ async def start_http_server():
         print("http_server stopped.")
 
 async def websocket_server_handler(websocket, path):
+
+    async def send(data):
+        await websocket.send(json.dumps(data) )
+
+    async def puke(data) :
+        print("pukepukepuke")
+        await send(data)
+
+    actions = {
+      "puke" : puke
+    }
+
     async for message in websocket:
         print(f"Received: {message}")
         parsed = json.loads(message)
         print(f"  action:{parsed['action']}")
+        action = actions[parsed['action']]
+        await action(parsed)
         #json.dumps(
-        await websocket.send(message) # echo back to client.
+        #await websocket.send(message) # echo back to client.
 
 async def start_websocket_server():
     print(f"starting websocket_server at port {websocket_port} ...")
