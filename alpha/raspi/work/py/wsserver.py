@@ -56,8 +56,6 @@ async def websocket_server_handler(websocket, path):
         print(f"  action:{parsed['action']}")
         action = actions[parsed['action']]
         await action(parsed)
-        #json.dumps(
-        #await websocket.send(message) # echo back to client.
 
 async def start_websocket_server():
     print(f"starting websocket_server at port {websocket_port} ...")
