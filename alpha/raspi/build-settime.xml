@@ -1,5 +1,0 @@
-<project default="all" basedir=".">
-  <target name="all">
-    <ant target="settime" />
-  </target>
-</project>
