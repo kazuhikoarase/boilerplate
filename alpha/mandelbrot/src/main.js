@@ -3,7 +3,7 @@
 window.addEventListener('load', function() {
 
   var calc = function() {
-    var limit = 4000;
+    var limit = 2000;
     var x, y, _x, x2, y2, c;
     return function(x0, y0) {
       x = 0;
@@ -18,7 +18,7 @@ window.addEventListener('load', function() {
         x = x2 - y2 + x0;
         y = 2 * _x * y + y0;
       }
-      return c;
+      return c * 8;
     };
   }();
 
@@ -37,8 +37,8 @@ window.addEventListener('load', function() {
 //      "cy":-0.34189200535416603,"scale":7.450580596923828e-9};
 //opts = {"cx":0.31106933593749997,"cy":-0.028784179687500005,"scale":0.000244140625};
 
-  var width = 880;
-  var height = 880;
+  var width = 200;
+  var height = 200;
 
 /*
   width = 3840;
@@ -143,9 +143,7 @@ window.addEventListener('load', function() {
         sy = (cur.y * cur.size - height / 2) * scale + opts.cy;
         v = calc(sx, sy);
         if (v > 0) {
-//          ctx.fillStyle = v % 2?'hsl(' + v * 8 + ',100%,50%)' : 'hsl(' + (v + 3) * 8 + ',100%,50%)';
           ctx.fillStyle = 'hsl(' + v + ',100%,50%)';
-          // : 'hsl(' + (v + 3) * 8 + ',100%,50%)';
           ctx.fillRect(cur.x, cur.y, 1, 1);
         } else {
           ctx.fillStyle = 'rgb(0,0,0)';
